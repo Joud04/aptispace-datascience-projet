@@ -1,4 +1,4 @@
-# PowerShell Script for Automated Environment Setup on Windows using Chocolatey
+﻿# PowerShell Script for Automated Environment Setup on Windows using Chocolatey
 $ErrorActionPreference = "Stop"
 
 Write-Host "🚀 Démarrage de l'installation automatisée pour Windows..." -ForegroundColor Cyan
@@ -21,7 +21,7 @@ Write-Host "📦 Installation des outils requis..." -ForegroundColor Cyan
 
 # Python 3.12 (ou version supérieure disponible)
 Write-Host "🐍 Installation de Python 3..." -ForegroundColor Yellow
-choco install python3 --version=3.12.2 -y --skip-automated-dependency-resolution
+choco install python3 --version 3.12.2 -y --skip-automated-dependency-resolution
 
 # Quarto CLI
 Write-Host "✍️ Installation de Quarto CLI..." -ForegroundColor Yellow
