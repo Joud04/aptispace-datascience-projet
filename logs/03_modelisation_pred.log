@@ -4,7 +4,7 @@ Libraries de modélisation prêtes !
 
 === STDERR ===
 Traceback (most recent call last):
-  File "/home/runner/work/aptispace-datascience-projet/aptispace-datascience-projet/src/03_modelisation_pred.py", line 22, in <module>
+  File "/home/runner/work/aptispace-datascience-projet/aptispace-datascience-projet/src/03_modelisation_pred.py", line 26, in <module>
     df = pd.read_csv('../data/processed/cleaned_data_sample.csv')
          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "/opt/hostedtoolcache/Python/3.12.13/x64/lib/python3.12/site-packages/pandas/io/parsers/readers.py", line 873, in read_csv

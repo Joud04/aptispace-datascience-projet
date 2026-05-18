@@ -1,6 +1,10 @@
 import os, sys
 sys.path.append('/home/runner/work/aptispace-datascience-projet/aptispace-datascience-projet')
 
+# Installation automatique des dépendances requises dans le noyau Jupyter actuel
+# %pip install -r ../requirements.txt
+
+
 import os
 import sys
 import pandas as pd

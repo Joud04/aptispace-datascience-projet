@@ -4,7 +4,7 @@ Libraries importées avec succès ! Prêt à démarrer le Wrangling.
 
 === STDERR ===
 Traceback (most recent call last):
-  File "/home/runner/work/aptispace-datascience-projet/aptispace-datascience-projet/src/01_data_wrangling.py", line 18, in <module>
+  File "/home/runner/work/aptispace-datascience-projet/aptispace-datascience-projet/src/01_data_wrangling.py", line 22, in <module>
     df_raw = dc.load_raw_data(raw_data_path)
              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   File "/home/runner/work/aptispace-datascience-projet/aptispace-datascience-projet/src/data_clean.py", line 25, in load_raw_data
