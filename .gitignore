@@ -5,6 +5,10 @@ __pycache__/
 
 # Notebooks Jupyter
 .ipynb_checkpoints/
+notebooks/compiled/*.py
+notebooks/compiled/*.log
+notebooks/compiled/*.qmd
+
 
 # Environnements Virtuels
 venv/

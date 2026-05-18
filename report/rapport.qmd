@@ -68,19 +68,8 @@ Le succès de tout projet de Data Science repose sur la qualité de la préparat
 
 [Rédiger la justification méthodologique ici]
 
-Exécutons le module de nettoyage :
-
-```python
-#| label: wrangling-execution
-#| echo: true
-import os
-import sys
-sys.path.append(os.path.abspath('..'))
-
-# TODO: Importer votre package de nettoyage 'src.data_clean'
-# TODO: Charger le fichier raw_sensor_traffic.csv, uniformiser les dates,
-# éliminer les outliers et imputer les valeurs manquantes à l'aide de vos fonctions.
-```
+## Travaux Pratiques de Wrangling
+{{< include ../notebooks/compiled/01_data_wrangling.qmd >}}
 
 ---
 
@@ -98,11 +87,8 @@ Dans cette section, nous analysons les relations statistiques fondamentales qui 
 
 [Rédiger votre explication de l'ingénierie de variables ici]
 
-```python
-#| label: feature-engineering
-#| echo: true
-# TODO: Appliquer votre ingénierie de variables temporelles sur votre jeu de données propre
-```
+## Travaux Pratiques d'Exploration Visuelle (EDA)
+{{< include ../notebooks/compiled/02_eda_visualisation.qmd >}}
 
 ---
 
@@ -159,10 +145,16 @@ graph TD
 
 [Détailler votre modélisation ici]
 
+### Travaux Pratiques de Modélisation Tabulaire
+{{< include ../notebooks/compiled/03_modelisation_pred.qmd >}}
+
 ## Modélisation Vision (Analyse d'Images)
 *À rédiger par les étudiants : Expliquez l'intérêt de la brique de Deep Learning d'images pour classifier le trafic. Détaillez l'architecture de votre réseau de neurones convolutif (CNN) conçu sous TensorFlow/Keras [@cnn_traffic2023] (conv, pooling, dense, dropout, activation) et commentez les courbes d'apprentissage obtenues.*
 
 [Détailler votre architecture CNN et analyse ici]
+
+### Travaux Pratiques de Vision par Ordinateur (CNN)
+{{< include ../notebooks/compiled/04_vision_cnn_tf.qmd >}}
 
 ---
 

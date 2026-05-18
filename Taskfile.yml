@@ -2,31 +2,41 @@ version: '3'
 
 tasks:
   default:
-    desc: Lance le rendu complet du rapport pour tous les formats (HTML, PDF, GFM README.md)
+    desc: Lance la compilation des notebooks et le rendu complet du rapport (HTML, PDF, GFM README.md)
     cmds:
       - task: render
 
-  render:
-    desc: Rendu complet de rapport.qmd dans tous les formats déclarés
+  compile:
+    desc: "Compile les notebooks (.ipynb) en 3 fichiers : .qmd (Quarto), .py (Script), .log (Journal d'exécution)"
     cmds:
+      - python3 src/compile_notebooks.py
+
+  render:
+    desc: Compile d'abord les notebooks puis génère le rapport complet dans tous les formats déclarés
+    cmds:
+      - task: compile
       - quarto render report/rapport.qmd
 
   html:
-    desc: Compile le rapport au format HTML uniquement (cosmo theme)
+    desc: Compile les notebooks puis génère le rapport au format HTML uniquement
     cmds:
+      - task: compile
       - quarto render report/rapport.qmd --to html
 
   pdf:
-    desc: Compile le rapport au format PDF uniquement (avec table des matières)
+    desc: Compile les notebooks puis génère le rapport au format PDF uniquement
     cmds:
+      - task: compile
       - quarto render report/rapport.qmd --to pdf
 
   gfm:
-    desc: Compile le rapport en GFM (GitHub Flavored Markdown) et met à jour le README.md
+    desc: Compile les notebooks puis génère le rapport en GFM (Markdown) pour mettre à jour le README.md
     cmds:
+      - task: compile
       - quarto render report/rapport.qmd --to gfm
 
   preview:
-    desc: Démarre le serveur Quarto de prévisualisation dynamique (live preview)
+    desc: Compile les notebooks puis démarre le serveur de prévisualisation dynamique Quarto
     cmds:
+      - task: compile
       - quarto preview report/rapport.qmd
