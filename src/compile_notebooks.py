@@ -6,10 +6,14 @@ import sys
 # Répertoires de travail
 base_dir = '/home/aptitek/Documents/Aptispace/datascience/lab/projet'
 notebooks_dir = os.path.join(base_dir, 'notebooks')
-compiled_dir = os.path.join(notebooks_dir, 'compiled')
+src_dir = os.path.join(base_dir, 'src')
+logs_dir = os.path.join(base_dir, 'logs')
+report_notebooks_dir = os.path.join(base_dir, 'report', 'notebooks')
 
-# S'assurer que le répertoire de destination existe
-os.makedirs(compiled_dir, exist_ok=True)
+# S'assurer que les répertoires de destination existent
+os.makedirs(src_dir, exist_ok=True)
+os.makedirs(logs_dir, exist_ok=True)
+os.makedirs(report_notebooks_dir, exist_ok=True)
 
 notebook_files = [
     '01_data_wrangling.ipynb',
@@ -68,20 +72,20 @@ for nb_file in notebook_files:
             if not source_str.endswith("\n"):
                 py_lines.append("\n")
                 
-    # 1. Écriture du script Python à exécuter (.py)
-    py_file_path = os.path.join(compiled_dir, f"{name_no_ext}.py")
+    # 1. Écriture du script Python à exécuter (.py) dans src/
+    py_file_path = os.path.join(src_dir, f"{name_no_ext}.py")
     with open(py_file_path, 'w', encoding='utf-8') as f:
         f.write("\n".join(py_lines))
     print(f"  ➡️  [PY]  Généré : {py_file_path}")
     
-    # 2. Écriture du fichier Quarto Markdown (.qmd)
-    qmd_file_path = os.path.join(compiled_dir, f"{name_no_ext}.qmd")
+    # 2. Écriture du fichier Quarto Markdown (.qmd) dans report/notebooks/
+    qmd_file_path = os.path.join(report_notebooks_dir, f"{name_no_ext}.qmd")
     with open(qmd_file_path, 'w', encoding='utf-8') as f:
         f.write("".join(qmd_lines))
     print(f"  ➡️  [QMD] Généré : {qmd_file_path}")
     
-    # 3. Exécution et capture des résultats dans un fichier journal (.log)
-    log_file_path = os.path.join(compiled_dir, f"{name_no_ext}.log")
+    # 3. Exécution et capture des résultats dans un fichier journal (.log) dans logs/
+    log_file_path = os.path.join(logs_dir, f"{name_no_ext}.log")
     print(f"  ➡️  [LOG] Exécution de {name_no_ext}.py...")
     try:
         result = subprocess.run(

@@ -68,7 +68,7 @@ Le succès de tout projet de Data Science repose sur la qualité de la préparat
 [Rédiger la justification méthodologique ici]
 
 ## Travaux Pratiques de Wrangling
-{{< include ../notebooks/compiled/01_data_wrangling.qmd >}}
+{{< include notebooks/01_data_wrangling.qmd >}}
 
 ---
 
@@ -87,7 +87,7 @@ Dans cette section, nous analysons les relations statistiques fondamentales qui 
 [Rédiger votre explication de l'ingénierie de variables ici]
 
 ## Travaux Pratiques d'Exploration Visuelle (EDA)
-{{< include ../notebooks/compiled/02_eda_visualisation.qmd >}}
+{{< include notebooks/02_eda_visualisation.qmd >}}
 
 ---
 
@@ -145,15 +145,15 @@ graph TD
 [Détailler votre modélisation ici]
 
 ### Travaux Pratiques de Modélisation Tabulaire
-{{< include ../notebooks/compiled/03_modelisation_pred.qmd >}}
+{{< include notebooks/03_modelisation_pred.qmd >}}
 
 ## Modélisation Vision (Analyse d'Images)
-*À rédiger par les étudiants : Expliquez l'intérêt de la brique de Deep Learning d'images pour classifier le trafic. Détaillez l'architecture de votre réseau de neurones convolutif (CNN) conçu sous TensorFlow/Keras [@cnn_traffic2023] (conv, pooling, dense, dropout, activation) et commentez les courbes d'apprentissage obtenues.*
+*À rédiger par les étudiants : Expliquez l'intérêt de la brique de Deep Learning d'images pour classifier le trafic. Détaillez l'architecture de votre réseau de neurones convolutif (CNN) conçu sous TensorFlow/Keras (conv, pooling, dense, dropout, activation) et commentez les courbes d'apprentissage obtenues.*
 
 [Détailler votre architecture CNN et analyse ici]
 
 ### Travaux Pratiques de Vision par Ordinateur (CNN)
-{{< include ../notebooks/compiled/04_vision_cnn_tf.qmd >}}
+{{< include notebooks/04_vision_cnn_tf.qmd >}}
 
 ---
 
