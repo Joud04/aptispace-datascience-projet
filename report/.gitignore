@@ -1,6 +1,7 @@
-# Ignorer les rapports compilés (HTML et PDF)
+# Ignorer les rapports compilés (HTML, PDF et Markdown intermédiaires)
 *.html
 *.pdf
+*.md
 
 # Ignorer les répertoires auxiliaires de style (CSS, JS) et caches Quarto
 *_files/
@@ -12,6 +13,3 @@
 !sujet.qmd
 !references.bib
 !assets/
-
-# Conserver le fichier README.md
-!README.md
