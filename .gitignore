@@ -35,3 +35,8 @@ Thumbs.db
 *.html
 /.quarto/
 **/*.quarto_ipynb
+
+# Dossier de travail / analyse Claude (notes internes, ne pas publier)
+claude/
+CLAUDE.md
+.claude/

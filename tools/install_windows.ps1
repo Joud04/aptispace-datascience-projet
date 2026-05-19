@@ -1,4 +1,4 @@
-# PowerShell Script for Automated Environment Setup on Windows using Chocolatey
+﻿# PowerShell Script for Automated Environment Setup on Windows using Chocolatey
 $ErrorActionPreference = "Stop"
 
 # Vérification des privilèges Administrateur
