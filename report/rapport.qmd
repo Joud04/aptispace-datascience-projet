@@ -1,10 +1,10 @@
 ---
-title: "Mon Projet Data Science"
-subtitle: "Projet Fil Rouge Data Science - Sujet Libre"
+title: "Prédiction des résultats de matchs de football internationaux"
+subtitle: "Projet Fil Rouge Data Science — Cap Coupe du Monde 2026"
 author:
-  - "Étudiant(e) 1 : [Insérer Prénom Nom]"
-  - "Étudiant(e) 2 : [Insérer Prénom Nom]"
-  - "Étudiant(e) 3 : [Insérer Prénom Nom]"
+  - "Étudiant(e) 1 : Joud Atallah"
+  - "Étudiant(e) 2 : Walid Hdilou"
+  - "Étudiant(e) 3 : Amine Kaoutar"
 date: today
 format:
   html:
@@ -32,25 +32,36 @@ link-citations: true
 
 # Introduction et Contexte Métier {#sec-intro}
 
-*À rédiger par les étudiants : Présentez ici le contexte global de votre projet, la problématique métier que vous cherchez à résoudre, les questions scientifiques soulevées et les opportunités d'aide à la décision sur la base de vos données.*
+Ce projet s'inscrit dans le cadre du Projet Fil Rouge de la formation Data Science & IA d'IPSSI. L'équipe a choisi de s'attaquer à une problématique d'actualité : **prédire le résultat des matchs internationaux de football**, avec en ligne de mire la Coupe du Monde FIFA 2026 organisée aux États-Unis, au Canada et au Mexique.
 
 ## Contexte du Projet
-*À rédiger par les étudiants — Pistes de réflexion :*
 
-- *Quels sont les objectifs globaux et le domaine d'étude de votre projet ?*
-- *En quoi ce sujet de recherche est-il pertinent et stratégique ?*
-- *Pourquoi l'analyse quantitative de ce jeu de données est-elle indispensable pour répondre à votre problématique ?*
+Le football international est un terrain d'application particulièrement riche pour la Data Science. Les compétitions y sont nombreuses, l'enjeu économique et médiatique colossal, et les données librement disponibles couvrent **plus de 150 ans d'histoire** : le premier match international officiel oppose l'Écosse à l'Angleterre en 1872. Notre dataset principal recense aujourd'hui plus de **47 000 rencontres** entre sélections nationales.
 
-[Rédiger votre paragraphe de contexte ici]
+Pourtant, prédire l'issue d'un match reste un défi. Niveau intrinsèque des équipes, dynamique récente, avantage du terrain, enjeu de la compétition, écart de classement FIFA, contexte historique — autant de signaux à combiner sans tomber dans le piège de la fuite de données (par exemple en utilisant une information qui n'existait pas encore au moment du match).
+
+L'objectif de ce projet est de construire un pipeline de Data Science **complet et reproductible**, depuis l'acquisition des données jusqu'à un modèle prédictif rigoureusement évalué. Au-delà de l'exercice technique, l'enjeu métier est double :
+
+- **expliquer** quels facteurs structurent réellement l'issue d'une rencontre internationale ;
+- **prédire** les résultats à venir — en particulier ceux des 72 matchs programmés de la CDM 2026.
+
+L'analyse quantitative est ici indispensable car l'intuition footballistique, aussi documentée soit-elle, ne suffit pas à arbitrer entre des hypothèses contradictoires : le classement FIFA est-il vraiment un bon prédicteur ? L'avantage à domicile résiste-t-il à l'ère des matchs en terrain neutre ? Le profil offensif d'une équipe se transmet-il d'une décennie à l'autre ? Seul un traitement statistique de l'historique permet de trancher.
 
 ## Objectif Analytique
-*À rédiger par les étudiants — Pistes de réflexion :*
 
-- *Quelles sont les variables cibles principales et la tâche globale de modélisation (classification, régression, clustering, etc.) ?*
-- *Comment le couplage de données multi-sources et l'intégration de différents types de données (tabulaires, images, signaux, etc.) enrichissent-ils l'analyse ?*
-- *Quels sont les livrables analytiques attendus pour répondre à votre problématique et guider les prises de décisions ?*
+La variable cible est le **résultat du match du point de vue de l'équipe recevante**, codé en trois modalités : `home_win`, `draw`, `away_win`. Il s'agit donc d'une tâche de **classification multi-classes**.
 
-[Rédiger votre paragraphe d'objectifs ici]
+Le couplage multi-sources est au cœur de notre démarche. Quatre jeux de données complémentaires sont fusionnés au sein du notebook `01_acquisition` :
+
+- les **résultats historiques** (`results.csv`, dataset *martj42/international_football_results*) fournissent la trame principale — date, équipes, score, tournoi, ville, pays, neutralité du terrain ;
+- les **classements FIFA mensuels** (1992–2024) ajoutent un signal de niveau relatif des équipes, joint temporellement par `pd.merge_asof` pour éviter toute fuite ;
+- les jeux annexes **`shootouts`** (tirs au but), **`goalscorers`** (buteurs) et **`former_names`** (anciens noms d'équipes) enrichissent et fiabilisent les jointures sur l'ensemble de l'historique.
+
+Les livrables attendus à l'issue du Jalon 1 (exploration) sont :
+
+1. un jeu de données **propre, fusionné et historiquement cohérent** (`data/processed/matches_clean.csv`, ~30 500 matchs exploitables) ;
+2. un **audit visuel** de l'histoire du football international (volume, tournois majeurs, dominantes nationales, intensité offensive, ratios de victoire) ;
+3. une **analyse exploratoire** statistique dégageant **cinq insights majeurs** qui orienteront la modélisation du Jalon 2.
 
 ---
 
