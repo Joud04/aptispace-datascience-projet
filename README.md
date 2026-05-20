@@ -285,7 +285,7 @@ insights exploitables pour les décideurs, en s’appuyant sur notre module
 # 📊 Étape 3 : Visualisation — l’histoire du football international
 
 Cette étape est consacrée à la visualisation. On explore l’**histoire du
-football international** à travers cinq graphiques, à l’aide de notre
+football international** à travers six graphiques, à l’aide de notre
 module `src/utils_viz.py`.
 
 **Donnée d’entrée :** `data/raw/results.csv` — l’historique **complet**
@@ -327,6 +327,14 @@ Le football est-il devenu plus ou moins offensif au fil des décennies ?
 Les sélections les plus performantes dans les grands tournois — ratio
 victoires / matchs joués —, parmi celles ayant disputé au moins 30
 matchs majeurs (seuil qui écarte les ratios non significatifs).
+
+### 8. Évolution du pourcentage de matchs joués par jour de la semaine
+
+Sept *small multiples*, un par jour de la semaine, montrent la part de
+matchs disputés ce jour-là année après année, jusqu’à 2018 exclu (on
+écarte les années marquées par la pandémie de Covid-19 et celles encore
+en cours). On distingue ainsi nettement les jours « traditionnels » du
+football international.
 
 ------------------------------------------------------------------------
 

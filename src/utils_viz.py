@@ -154,6 +154,59 @@ def plot_avg_goals_per_decade(df):
     return fig
 
 
+def plot_weekday_evolution(df, year_max=2018):
+    """Évolution du pourcentage de matchs joués par jour de la semaine.
+
+    Présente sept petits graphiques (*small multiples*), un par jour de la
+    semaine, montrant la part de matchs joués ce jour-là, année par année,
+    jusqu'à `year_max` exclu. Le filtre écarte les années marquées par des
+    aléas exceptionnels (pandémie de Covid-19) ou non encore complètes.
+
+    Paramètres
+    ----------
+    df : pandas.DataFrame
+        Matchs, avec la colonne `date` (datetime ou convertible).
+    year_max : int
+        Borne supérieure (exclue) sur l'année.
+
+    Retour
+    ------
+    matplotlib.figure.Figure
+    """
+    df = df.copy()
+    df['date'] = pd.to_datetime(df['date'])
+    df['year'] = df['date'].dt.year
+    df['dayofweek'] = df['date'].dt.day_name()
+
+    df = df[df['year'] < year_max]
+    par_jour = (df.groupby(['year', 'dayofweek']).size()
+                  .reset_index(name='n'))
+    par_jour['perc'] = par_jour.groupby('year')['n'].transform(
+        lambda x: (x / x.sum()) * 100)
+
+    ordre_jours = ['Monday', 'Tuesday', 'Wednesday', 'Thursday',
+                   'Friday', 'Saturday', 'Sunday']
+    par_jour['dayofweek'] = pd.Categorical(par_jour['dayofweek'],
+                                           categories=ordre_jours,
+                                           ordered=True)
+
+    g = sns.relplot(
+        data=par_jour, x='year', y='perc',
+        col='dayofweek', col_wrap=4,
+        hue='dayofweek', kind='line',
+        linewidth=2.5, height=3.5, aspect=1.2,
+        palette='Set2', legend=False,
+    )
+    g.set_titles('{col_name}', size=12, fontweight='bold')
+    g.set_axis_labels('Année', 'Pourcentage (%)')
+    g.fig.suptitle(
+        f"Évolution du pourcentage de matchs joués par jour de la "
+        f"semaine (< {year_max})",
+        y=1.03, fontsize=15, fontweight='bold')
+    g.fig.tight_layout()
+    return g.fig
+
+
 def plot_best_win_ratios(df, major_tournaments, n=15, min_matches=30):
     """Les `n` équipes au meilleur ratio de victoires en tournois majeurs.
 
