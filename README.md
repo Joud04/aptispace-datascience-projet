@@ -368,7 +368,24 @@ Résumé statistique global des variables numériques, puis une analyse par
 groupe : les buts marqués selon que le match se joue sur terrain neutre
 ou non.
 
-### 4. Ingénierie de variables (Feature Engineering)
+### 4. Distribution des variables numériques
+
+Avant de croiser les variables, on examine la **distribution univariée**
+de chacune des principales variables numériques (chapitres 4.2.1
+*Tendance Centrale* et 4.2.2 *Dispersion* du cours). Pour chaque
+variable, l’histogramme est superposé d’une courbe **KDE** (densité
+lissée) et de deux lignes verticales : la **moyenne** (rouge) et la
+**médiane** (verte).
+
+L’écart entre moyenne et médiane est un indicateur direct de
+l’**asymétrie** de la distribution (chapitre 4.2.4, *moyenne vs
+médiane*). Pour une distribution symétrique, les deux se confondent.
+Pour une distribution **asymétrique à droite** (cas typique des
+compteurs de buts : beaucoup de petits scores, quelques scores énormes),
+la moyenne est tirée vers les valeurs extrêmes alors que la médiane
+reste centrale.
+
+### 5. Ingénierie de variables (Feature Engineering)
 
 On applique `dc.feature_engineering` pour créer les variables dérivées :
 indicateurs temporels (`year`, `decade`), variables de match
@@ -376,14 +393,39 @@ indicateurs temporels (`year`, `decade`), variables de match
 (`rank_difference`) et la **variable cible** `result` (victoire domicile
 / nul / victoire extérieur).
 
-### 5. Analyse des corrélations
+### 6. Distribution de la cible — `result`
+
+La variable cible `result` a trois modalités : `home_win`, `draw`,
+`away_win`. Le **count plot** ci-dessous visualise leur fréquence et
+confirme un **déséquilibre marqué** : les victoires à domicile dominent
+(≈ 48 %), suivies des victoires extérieures (≈ 28 %), les matchs nuls
+étant minoritaires (≈ 23 %).
+
+Ce déséquilibre devra être pris en compte au Jalon 2 (par exemple via
+`class_weight='balanced'` ou un échantillonnage stratifié).
+
+### 7. Boxplots — dispersion par classe de résultat
+
+Le **boxplot** (chapitre 4.2.2 du cours, *dispersion*) est la façon la
+plus directe de comparer la dispersion d’une variable numérique entre
+plusieurs groupes. La boîte représente l’**intervalle interquartile**
+(IQR : 25ᵉ → 75ᵉ percentile), la barre centrale la **médiane**, et les
+points isolés les **outliers**.
+
+On compare ici la dispersion de `goal_difference` (écart de buts) et
+`total_goals` (intensité offensive du match) selon le résultat. On
+s’attend à voir un `goal_difference` très négatif pour les victoires
+extérieures, très positif pour les victoires à domicile, et serré autour
+de 0 pour les nuls.
+
+### 8. Analyse des corrélations
 
 On mesure les liens entre variables numériques avec deux coefficients :
 **Pearson** (relations linéaires) et **Spearman** (relations monotones,
 plus robuste aux valeurs extrêmes). Le point d’intérêt : l’écart de
-classement FIFA (`rank_difference`).
+classement FIFA (`rank_difference`). *Couvre §4.3.2 du cours.*
 
-### 6. Pairplot — vision globale des relations
+### 9. Pairplot — vision globale des relations
 
 Le `pairplot` (chapitre 4.3.1 du cours) est l’outil classique pour
 visualiser **toutes les relations bivariées** entre quelques variables
@@ -394,7 +436,7 @@ zones où chaque classe (`home_win`, `away_win`, `draw`) se concentre.
 On échantillonne **2 000 matchs aléatoires** : le pairplot complet sur
 30 511 points serait très lent à rendre et illisible.
 
-### 7. Matrice de corrélation massive (toutes les variables)
+### 10. Matrice de corrélation massive (toutes les variables)
 
 Pour aller plus loin que les seules variables numériques de la section
 précédente, on encode **toutes** les variables qualitatives (texte,
@@ -409,14 +451,14 @@ modalités). Les coefficients impliquant ces variables encodées signalent
 des **dépendances éventuelles**, pas une relation linéaire interprétable
 — à manipuler avec précaution.
 
-### 8. Le classement FIFA prédit-il le résultat ?
+### 11. Le classement FIFA prédit-il le résultat ?
 
 On croise l’issue du match avec le fait que l’équipe à domicile soit, ou
 non, mieux classée que son adversaire — un premier aperçu du pouvoir
 prédictif du classement. C’est un cas typique de *split-apply-combine*
 (chapitre 4.4.1 du cours).
 
-### 9. Pivot table — taux de victoire croisé
+### 12. Pivot table — taux de victoire croisé
 
 Au-delà du simple `groupby`, le **pivot table** (chapitre 4.4.2 du
 cours) permet de croiser deux dimensions et de visualiser l’effet
@@ -431,16 +473,16 @@ C’est la façon la plus directe de confirmer que l’**avantage à domicile
 disparaît effectivement sur terrain neutre**, et de voir si la nature du
 tournoi joue un rôle indépendant.
 
-### 10. Binning — taux de victoire par classe d’écart de classement
+### 13. Binning — taux de victoire par classe d’écart de classement
 
 Au-delà du simple binaire « mieux classé / moins bien classé » étudié en
-section 8, on découpe `rank_difference` en **5 classes** via `pd.cut`
+section 11, on découpe `rank_difference` en **5 classes** via `pd.cut`
 (chapitre 4.4.3 du cours, *binning / discrétisation*). Le bar plot
 révèle une **progression monotone** du taux de victoire à domicile en
 fonction de l’écart de classement — un signal très exploitable pour la
 modélisation au Jalon 2.
 
-### 11. Synthèse — insights majeurs
+### 14. Synthèse — insights majeurs
 
 À l’issue de l’exploration, cinq constats structurent la suite du projet
 :
