@@ -383,13 +383,28 @@ On mesure les liens entre variables numériques avec deux coefficients :
 plus robuste aux valeurs extrêmes). Le point d’intérêt : l’écart de
 classement FIFA (`rank_difference`).
 
-### 6. Le classement FIFA prédit-il le résultat ?
+### 6. Matrice de corrélation massive (toutes les variables)
+
+Pour aller plus loin que les seules variables numériques de la section
+précédente, on encode **toutes** les variables qualitatives (texte,
+booléen, catégorie) en codes catégoriels
+(`.astype('category').cat.codes`), puis on calcule la matrice de
+corrélation complète. La heatmap met ainsi en lumière les éventuelles
+structures cachées impliquant `home_team`, `away_team`, `tournament`,
+`city`, `country`, `result`, etc.
+
+⚠️ Les codes catégoriels sont arbitraires (ordre alphabétique des
+modalités). Les coefficients impliquant ces variables encodées signalent
+des **dépendances éventuelles**, pas une relation linéaire interprétable
+— à manipuler avec précaution.
+
+### 7. Le classement FIFA prédit-il le résultat ?
 
 On croise l’issue du match avec le fait que l’équipe à domicile soit, ou
 non, mieux classée que son adversaire — un premier aperçu du pouvoir
 prédictif du classement.
 
-### 7. Synthèse — insights majeurs
+### 8. Synthèse — insights majeurs
 
 À l’issue de l’exploration, cinq constats structurent la suite du projet
 :
