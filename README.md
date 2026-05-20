@@ -383,7 +383,18 @@ On mesure les liens entre variables numériques avec deux coefficients :
 plus robuste aux valeurs extrêmes). Le point d’intérêt : l’écart de
 classement FIFA (`rank_difference`).
 
-### 6. Matrice de corrélation massive (toutes les variables)
+### 6. Pairplot — vision globale des relations
+
+Le `pairplot` (chapitre 4.3.1 du cours) est l’outil classique pour
+visualiser **toutes les relations bivariées** entre quelques variables
+clés, avec la distribution univariée sur la diagonale. Ici, on colore
+chaque point par le **résultat du match** : on voit immédiatement les
+zones où chaque classe (`home_win`, `away_win`, `draw`) se concentre.
+
+On échantillonne **2 000 matchs aléatoires** : le pairplot complet sur
+30 511 points serait très lent à rendre et illisible.
+
+### 7. Matrice de corrélation massive (toutes les variables)
 
 Pour aller plus loin que les seules variables numériques de la section
 précédente, on encode **toutes** les variables qualitatives (texte,
@@ -398,13 +409,38 @@ modalités). Les coefficients impliquant ces variables encodées signalent
 des **dépendances éventuelles**, pas une relation linéaire interprétable
 — à manipuler avec précaution.
 
-### 7. Le classement FIFA prédit-il le résultat ?
+### 8. Le classement FIFA prédit-il le résultat ?
 
 On croise l’issue du match avec le fait que l’équipe à domicile soit, ou
 non, mieux classée que son adversaire — un premier aperçu du pouvoir
-prédictif du classement.
+prédictif du classement. C’est un cas typique de *split-apply-combine*
+(chapitre 4.4.1 du cours).
 
-### 8. Synthèse — insights majeurs
+### 9. Pivot table — taux de victoire croisé
+
+Au-delà du simple `groupby`, le **pivot table** (chapitre 4.4.2 du
+cours) permet de croiser deux dimensions et de visualiser l’effet
+conjoint sur une troisième. Ici, on croise :
+
+- **lignes** : `tournoi_majeur` (Coupe du Monde / continentaux /
+  Confederations Cup, ou autre) ;
+- **colonnes** : `neutral` (terrain neutre ou non) ;
+- **cellules** : taux de victoire à domicile (%).
+
+C’est la façon la plus directe de confirmer que l’**avantage à domicile
+disparaît effectivement sur terrain neutre**, et de voir si la nature du
+tournoi joue un rôle indépendant.
+
+### 10. Binning — taux de victoire par classe d’écart de classement
+
+Au-delà du simple binaire « mieux classé / moins bien classé » étudié en
+section 8, on découpe `rank_difference` en **5 classes** via `pd.cut`
+(chapitre 4.4.3 du cours, *binning / discrétisation*). Le bar plot
+révèle une **progression monotone** du taux de victoire à domicile en
+fonction de l’écart de classement — un signal très exploitable pour la
+modélisation au Jalon 2.
+
+### 11. Synthèse — insights majeurs
 
 À l’issue de l’exploration, cinq constats structurent la suite du projet
 :
@@ -417,7 +453,8 @@ prédictif du classement.
 2.  **Le classement FIFA est le signal le plus fort.** Quand l’équipe à
     domicile est mieux classée que son adversaire, elle gagne **64,7 %**
     du temps ; quand elle est moins bien classée, ce taux chute à 31,1 %
-    (et elle perd 43,3 % du temps).
+    (et elle perd 43,3 % du temps). Le binning par classes d’écart
+    confirme une progression nettement monotone.
 
 3.  **L’écart de classement est corrélé à l’écart de buts** (Pearson
     0,47, Spearman 0,48) : plus le fossé de classement est grand, plus
