@@ -1,7 +1,7 @@
 # Prédiction des résultats de matchs de football internationaux
 Étudiant(e) 1 : Joud Atallah, Étudiant(e) 2 : Walid Hdilou, Étudiant(e)
 3 : Amine Kaoutar
-2026-05-20
+2026-05-21
 
 - [Introduction et Contexte Métier](#sec-intro)
   - [Contexte du Projet](#contexte-du-projet)
@@ -29,9 +29,8 @@
 - [Modélisation et Apprentissage](#sec-modelling)
   - [Chapitre 5 : Travaux Pratiques de Modélisation (ML &
     DL)](#chapitre-5--travaux-pratiques-de-modélisation-ml--dl)
-- [🧠 Étape 5 : Modélisation (Machine Learning & Deep Learning)
-  (Squelette
-  Étudiant)](#brain-étape-5--modélisation-machine-learning--deep-learning-squelette-étudiant)
+- [🧠 Étape 5 : Modélisation — Prédiction du résultat des matchs
+  internationaux](#brain-étape-5--modélisation--prédiction-du-résultat-des-matchs-internationaux)
 - [Évaluation Métrique et Validation](#sec-evaluation)
   - [Chapitre 6 : Travaux Pratiques d’Évaluation &
     Robustesse](#chapitre-6--travaux-pratiques-dévaluation--robustesse)
@@ -541,26 +540,213 @@ graph TD
 
 ## Chapitre 5 : Travaux Pratiques de Modélisation (ML & DL)
 
-# 🧠 Étape 5 : Modélisation (Machine Learning & Deep Learning) (Squelette Étudiant)
+# 🧠 Étape 5 : Modélisation — Prédiction du résultat des matchs internationaux
 
-Cette étape correspond au cinquième chapitre du cours. L’objectif est
-d’implémenter d’une part un modèle de Machine Learning tabulaire (ex:
-RandomForest) et d’autre part un réseau de neurones convolutif (CNN)
-sous TensorFlow pour traiter des images ou signaux complexes.
+Cette étape est le cœur du **Jalon 2**. On entraîne deux modèles
+d’apprentissage supervisé pour prédire l’issue d’un match (`home_win` /
+`draw` / `away_win`), avec en ligne de mire la **Coupe du Monde FIFA
+2026**.
+
+**Donnée d’entrée :** `data/processed/matches_clean.csv` — 30 511 matchs
+nettoyés (1993 → mars 2026), classements FIFA inclus.
+
+**Approche — alignée sur le chapitre 5 du cours :**
+
+- Tâche : **classification multi-classes** sur données tabulaires (§5.2
+  du cours).
+- Deux modèles, exactement ceux que le cours implémente en Python :
+  - **Random Forest** — méthode d’ensemble par *Bagging* (§5.6.1) ;
+  - **XGBoost** — méthode d’ensemble par *Boosting* (§5.6.2).
+- Concepts clés (§5.7) mobilisés : compromis biais-variance,
+  sur-ajustement, importance d’une baseline.
+
+**Deux apports de cette version :**
+
+1.  un *feature engineering* enrichi — on reconstruit l’**historique
+    réel de chaque équipe** (buts marqués/encaissés, forme récente,
+    force des adversaires) ;
+2.  une **analyse par groupe** — on applique le modèle aux 72 matchs de
+    la phase de groupes de la CDM 2026 et on dresse le **classement des
+    12 groupes**.
 
 ### 1. Préparation de l’environnement
 
-### 2. Modélisation Tabulaire (Machine Learning)
+### 2. Feature engineering — l’historique de chaque équipe
 
-**À COMPLÉTER PAR L’ÉTUDIANT :** Entraînez un modèle d’apprentissage
-supervisé (ex: forêt aléatoire) sur les caractéristiques extraites de
-votre jeu de données.
+Le classement FIFA seul est une photo figée : il ne dit rien de la
+**dynamique** d’une équipe (attaque prolifique ? défense fragile ? bonne
+forme récente ?). On reconstruit donc, pour chaque match, le passé de
+chaque équipe.
 
-### 3. Modélisation Vision / Deep Learning (CNN & TensorFlow)
+**Méthode — table « longue ».** Chaque match est dédoublé en deux lignes
+(une par équipe), pour suivre chaque sélection comme un fil
+chronologique :
 
-**À COMPLÉTER PAR L’ÉTUDIANT :** Pour des motifs complexes
-(images/signaux), mettez en place un réseau convolutif (Conv2D, Pooling,
-Dense) pour classifier ou enrichir vos prédictions.
+| Variable construite | Signification |
+|----|----|
+| `goals` / `goals_suf` | buts marqués / encaissés par l’équipe ce match-là |
+| `game_points` | points du match (3 victoire / 1 nul / 0 défaite) |
+| `game_points_rank` | points **pondérés par la force de l’adversaire** : battre le 1ᵉʳ mondial vaut bien plus que battre le 200ᵉ |
+
+⚠️ **Anti-fuite de données.** Toutes les moyennes seront **décalées d’un
+match** (`.shift(1)`) : un match ne « voit » jamais son propre résultat,
+uniquement ceux qui le précèdent.
+
+#### Moyennes glissantes par équipe
+
+Pour chaque équipe, triée dans l’ordre chronologique, on calcule deux
+types de moyennes — toujours **décalées d’un match** :
+
+- **moyenne sur tout le passé** (`expanding`) → le niveau de fond de
+  l’équipe ;
+- **moyenne sur les 5 derniers matchs** (`_l5`, *rolling*) → la **forme
+  récente**.
+
+On obtient ainsi, pour chaque équipe : buts marqués (`goals_mean`), buts
+encaissés (`goals_suf_mean`), rang moyen des adversaires affrontés
+(`rank_mean`, une mesure de la difficulté du calendrier) et points
+pondérés (`game_points_rank_mean`).
+
+### 3. Variables différentielles (`create_db`) et cible
+
+Un modèle prédit mieux à partir d’**écarts** entre les deux équipes qu’à
+partir de valeurs absolues. On dérive donc, pour chaque indicateur, la
+différence domicile − extérieur — c’est la logique de la fonction
+`create_db` du notebook Kaggle de référence.
+
+**12 variables explicatives finales :**
+
+| Variable | Sens |
+|----|----|
+| `rank_dif` | écart de classement FIFA actuel |
+| `goals_dif` / `goals_dif_l5` | écart d’attaque (global / forme récente) |
+| `goals_suf_dif` / `goals_suf_dif_l5` | écart de fragilité défensive |
+| `goals_per_ranking_dif` | efficacité offensive corrigée de la force du calendrier |
+| `dif_rank_agst` / `dif_rank_agst_l5` | écart de difficulté des adversaires affrontés |
+| `dif_points_rank` / `dif_points_rank_l5` | écart de performance pondérée par la force adverse |
+| `is_friendly_0` / `is_friendly_1` | match amical ou enjeu réel (one-hot) |
+
+La **cible** `result` est déduite directement des scores
+(`0 = away_win`, `1 = draw`, `2 = home_win`). Les scores eux-mêmes
+(`home_score`, `away_score`) ne sont **jamais** donnés au modèle : ce
+serait une fuite de données évidente.
+
+#### Séparation entraînement / test
+
+On encode la cible numériquement puis on réalise un **split stratifié
+80/20** (les proportions de classes sont conservées dans les deux jeux).
+Le jeu de test ne sera utilisé qu’à la toute fin, pour mesurer la
+capacité de **généralisation** des modèles (§5.7 du cours).
+
+### 4. Baseline naïve
+
+Avant tout modèle ML, on établit la performance d’un **prédicteur
+trivial** qui prédit toujours la classe majoritaire (`home_win`). C’est
+la référence à battre : sans elle, impossible de savoir si un modèle
+apprend réellement quelque chose (cf. §5.7 du cours).
+
+### 5. Modèle 1 — Random Forest (§5.6.1 du cours, *Bagging*)
+
+> *« Le Bagging consiste à entraîner de nombreux modèles de manière
+> indépendante et en parallèle sur des sous-ensembles aléatoires de vos
+> données. C’est un jury d’assises. \[…\] La Forêt Aléatoire crée des
+> centaines d’arbres de décision. Force : très robuste contre le
+> sur-ajustement. »*
+
+On instancie exactement comme le cours, en ajustant `n_estimators` et
+`max_depth` pour notre volume de données. `class_weight='balanced'`
+compense le déséquilibre des classes observé en EDA.
+
+### 6. Modèle 2 — XGBoost (§5.6.2 du cours, *Boosting*)
+
+> *« Le Boosting fonctionne de manière séquentielle. Chaque nouvel arbre
+> est construit spécifiquement pour corriger les erreurs (les résidus)
+> des précédents. XGBoost : le standard industriel, ultra-optimisé et
+> régularisé. »*
+
+On instancie `XGBClassifier` exactement comme dans le cours
+(`n_estimators=100, learning_rate=0.1`). XGBoost gère nativement les
+cibles multi-classes.
+
+### 7. Comparaison des modèles + matrice de confusion
+
+On compare les deux modèles sur le jeu de **test** (jamais vu pendant
+l’entraînement), et on visualise la **matrice de confusion** du meilleur
+d’entre eux pour identifier ses erreurs typiques — en particulier sur
+les matchs nuls, la classe minoritaire.
+
+### 8. Importance des variables
+
+Le Random Forest expose nativement l’**importance de chaque variable**
+(importance de Gini). On vérifie ainsi quelles caractéristiques pèsent
+réellement dans la décision : les variables d’historique enrichi (buts,
+points pondérés) apportent-elles plus que le simple classement ?
+
+### 9. Prédiction des 72 matchs de la phase de groupes (CDM 2026)
+
+On applique le meilleur modèle aux **72 matchs programmés de la phase de
+groupes** (`data/processed/matches_a_predire.csv`) — soit les 48 équipes
+réparties en 12 groupes de 4.
+
+Pour chaque équipe, on calcule sa **forme actuelle** : les mêmes
+moyennes (buts, points pondérés, force du calendrier) mais cette fois
+sur **l’intégralité** de son historique connu, jusqu’à mars 2026. On
+reconstruit les 12 variables différentielles, puis on prédit l’issue de
+chaque match ainsi que les **probabilités** des trois résultats
+possibles.
+
+### 10. Classement des 12 groupes — qui sort de sa poule ?
+
+On reconstitue maintenant le **classement de chaque groupe** à partir
+des prédictions. La répartition officielle des 48 équipes (tirage du 5
+décembre 2025) est fournie par le module `src/wc2026.py`.
+
+**Comment on classe les équipes ?** Comme dans un vrai classement de
+football : **par points** (3 victoire / 1 nul / 0 défaite), à partir des
+6 matchs internes au groupe.
+
+Problème : le modèle prédit très rarement le match nul, donc beaucoup
+d’équipes terminent **à égalité de points**. On les départage avec les
+**points espérés** (`xPts`) :
+
+$$xPts = \sum_{\text{3 matchs}} \big( 3 \times P(\text{victoire}) + 1 \times P(\text{nul}) \big)$$
+
+C’est l’**espérance mathématique** du nombre de points, compte tenu des
+probabilités du modèle. `xPts` joue ici le rôle que tient la différence
+de buts dans un vrai classement — un critère fin que notre modèle (qui
+prédit une *issue*, pas un *score*) ne peut pas fournir directement.
+
+**Format CDM 2026 :** les **2 premiers** de chaque groupe + les **8
+meilleurs 3ᵉˢ** se qualifient → 32 équipes pour les 16ᵉˢ de finale.
+C’est cette liste qui servira de point de départ au notebook 06.
+
+#### Vainqueurs de groupe et équipes qualifiées
+
+### 11. Synthèse — modélisation
+
+1.  **Les deux modèles battent largement la baseline naïve** (~48.5 %) :
+    le *feature engineering* enrichi (historique de buts, forme récente,
+    force du calendrier) apporte un vrai signal prédictif.
+2.  **Le passage du classement FIFA seul aux 12 variables
+    différentielles fait progresser la précision de test** — voir le
+    tableau récapitulatif du §7. Les variables d’historique
+    (`dif_points_rank`, `goals_per_ranking_dif`, `goals_suf_dif`)
+    figurent en tête de l’importance, aux côtés du `rank_dif`.
+3.  **Random Forest et XGBoost** restent au coude-à-coude, conformément
+    à la littérature sur les données tabulaires (§5.1 du cours : *les
+    arbres dominent encore le tabulaire face au Deep Learning*).
+4.  **Phase de groupes CDM 2026** : les 72 matchs sont prédits, puis
+    agrégés en **classement des 12 groupes** via les points espérés
+    (`xPts`). On en déduit les 12 vainqueurs de groupe et les **32
+    équipes qualifiées** pour les 16ᵉˢ de finale.
+5.  **Limites identifiées** : la classe `draw` reste sous-prédite
+    (matchs nuls intrinsèquement difficiles) ; chaque match est prédit
+    indépendamment.
+
+➡️ Le notebook suivant (`06_evaluation`) approfondira l’évaluation
+(validation croisée temporelle, métriques par classe) puis exploitera la
+liste des 32 qualifiés pour **simuler la phase à élimination directe**
+et désigner le vainqueur de la Coupe du Monde.
 
 ------------------------------------------------------------------------
 
