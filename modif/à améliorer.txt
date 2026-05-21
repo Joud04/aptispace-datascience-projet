@@ -1,0 +1,78 @@
+Résumé de vérification du dashboard
+===================================
+
+Les résultats principaux affichés dans les dashboards sont cohérents avec les
+sorties des notebooks 05, 06 et 07.
+
+Points validés
+--------------
+
+- Accuracy test XGBoost : 58,8 %, cohérent avec la valeur 0.588.
+- Baseline naïve : 48,5 %, donc le gain affiché de +10,3 points est correct.
+- ROC-AUC : 0,730, cohérent avec le notebook 06.
+- Brésil favori : 23,4 % de probabilité de titre, cohérent avec les 20 000
+  simulations du tournoi.
+- Finale projetée : Brazil - France, avec Brazil vainqueur à 56 %, cohérent
+  avec la simulation déterministe.
+- Point faible du modèle : les matchs nuls, avec un rappel de 2,6 %, cohérent
+  avec le rapport de classification.
+
+Points à améliorer ou à surveiller
+----------------------------------
+
+1. Formulation sur XGBoost
+
+Le dashboard indique parfois que XGBoost est le modèle avec la "meilleure
+accuracy test". C'est vrai par rapport à la baseline et au Random Forest, mais
+le notebook 06 trouve aussi une version optimisée à 0.592.
+
+Formulation plus précise :
+"XGBoost retenu pour cohérence avec la phase de groupes".
+
+2. Bracket du dashboard opérationnel
+
+Le dashboard opérationnel affiche une version raccourcie du bracket pour garder
+une interface sans scroll. Ce n'est pas faux, mais il faut éviter de laisser
+penser que tous les matchs sont visibles.
+
+Formulation possible :
+"Extrait de la phase finale projetée".
+
+3. Importance des variables
+
+Les variables clés affichées viennent de l'importance calculée avec Random
+Forest dans le notebook 05. C'est utile pour l'explication, mais ce n'est pas
+une importance directement calculée sur XGBoost.
+
+Formulation plus précise :
+"Importance estimée avec Random Forest".
+
+4. Fichiers src à clarifier
+
+Les fichiers src/05_modelisation.py et src/06_evaluation.py ne semblent pas
+correspondre au vrai projet football. Ils ressemblent à d'anciens scripts
+gabarits avec RandomForestRegressor, MAE/RMSE/R2 et cleaned_data_sample.csv.
+
+Risque :
+si quelqu'un ouvre les scripts src au lieu des notebooks, il peut penser que le
+projet n'est pas cohérent.
+
+Amélioration possible :
+mettre à jour ces scripts ou préciser dans le README que les notebooks font foi.
+
+5. Données exportées non présentes
+
+Les CSV générés par les notebooks ne sont pas présents dans data/processed dans
+la version actuelle du dépôt. Les dashboards utilisent donc des valeurs recopiées
+depuis les sorties des notebooks.
+
+Amélioration possible :
+versionner les CSV finaux utiles au dashboard, ou indiquer clairement que le
+dashboard est une restitution statique basée sur les sorties notebook.
+
+Conclusion
+----------
+
+Il n'y a pas d'incohérence grave dans les résultats affichés. Les chiffres clés
+sont alignés avec les notebooks. Les corrections à prévoir sont surtout des
+corrections de formulation pour éviter les ambiguïtés à l'oral.
