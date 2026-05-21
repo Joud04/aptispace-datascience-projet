@@ -19,6 +19,7 @@ tasks:
       - quarto render report/rapport.qmd
       - rm -rf report/slides_files/ report/rapport_files/ report/installation_files/
       - cp build/report/rapport.pdf report/rapport.pdf
+      - cp build/report/rapport.md README.md
 
   html:
     desc: Compile les notebooks puis génère le rapport au format HTML uniquement

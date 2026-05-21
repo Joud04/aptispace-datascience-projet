@@ -39,8 +39,8 @@
 - [Data Storytelling et Communication](#sec-storytelling)
   - [Chapitre 7 : Travaux Pratiques de
     Storytelling](#chapitre-7--travaux-pratiques-de-storytelling)
-- [📢 Étape 7 : Data Storytelling & Communication (Squelette
-  Étudiant)](#loudspeaker-étape-7--data-storytelling--communication-squelette-étudiant)
+- [📢 Étape 7 : Data Storytelling et communication des
+  résultats](#loudspeaker-étape-7--data-storytelling-et-communication-des-résultats)
   - [Présentation des Résultats (Livrables
     Interactifs)](#présentation-des-résultats-livrables-interactifs)
 - [Utilisation de l’Intelligence Artificielle](#sec-ai)
@@ -894,28 +894,192 @@ hasard selon sa probabilité. La fréquence de victoire finale de chaque
 
 # Data Storytelling et Communication
 
+Un modèle qui ne convainc pas n’a aucune valeur. Cette dernière étape
+**traduit** les résultats techniques en un récit clair pour un public
+non spécialiste : structuration du message selon les frameworks SCQA et
+de la pyramide de Minto (la réponse d’abord), traduction des métriques
+en langage courant, et surtout communication **honnête de
+l’incertitude** — la prédiction finale est annoncée non comme une
+certitude, mais comme une probabilité assumée.
+
 ## Chapitre 7 : Travaux Pratiques de Storytelling
 
-# 📢 Étape 7 : Data Storytelling & Communication (Squelette Étudiant)
+# 📢 Étape 7 : Data Storytelling et communication des résultats
 
-Cette étape correspond au septième et dernier chapitre de data science.
-L’objectif est de synthétiser vos résultats pour des profils métiers ou
-décideurs et de proposer des visualisations interactives ou dynamiques
-pour valoriser vos conclusions.
+Dernière étape du cycle de la donnée, alignée sur le **chapitre 7 du
+cours** (« Communication des Résultats »). Un modèle, aussi performant
+soit-il, ne vaut rien s’il ne convainc pas : *« un modèle parfait qui ne
+convainc pas le comité de direction est un modèle mort »* (cours, §7.1).
+
+Cette étape **traduit** les résultats techniques des notebooks 05 et 06
+en un récit clair, destiné à un public non technique (médias sportifs,
+supporters, décideurs d’une fédération). On mobilise les outils du cours
+:
+
+- le framework **SCQA** (Situation, Complication, Question, Answer) et
+  la **pyramide de Minto** (la réponse d’abord) pour structurer le récit
+  ;
+- le framework **O.I.A.** (Observation → Insight → Action) pour que
+  chaque résultat réponde à la question *« So what ? »* ;
+- une communication **honnête de l’incertitude** (§7.3) — la marque d’un
+  expert, pas d’un devin.
 
 ### 1. Préparation de l’environnement
 
-### 2. Synthèse métier et Storytelling
+### 2. Reprise des résultats des notebooks 05 et 06
 
-**À COMPLÉTER PAR L’ÉTUDIANT :** Traduisez vos métriques techniques en
-impacts stratégiques (par exemple, gains financiers, réduction de coûts,
-amélioration de la sécurité, etc.).
+On recharge les livrables produits par les étapes précédentes du
+pipeline :
 
-### 3. Visualisation Interactive (Plotly)
+- `cdm2026_qualifies.csv` — les 32 équipes qualifiées et le classement
+  des 12 groupes (notebook 05) ;
+- `cdm2026_podium.csv` — le podium issu de la simulation déterministe du
+  bracket (notebook 06) ;
+- `cdm2026_titres.csv` — la **probabilité de titre** de chaque équipe,
+  estimée par 20 000 simulations Monte-Carlo (notebook 06).
 
-**À COMPLÉTER PAR L’ÉTUDIANT :** Générez un graphique interactif (par
-exemple en utilisant Plotly ou des éléments OJS dans le document final)
-pour permettre aux décideurs d’interagir dynamiquement avec vos données.
+### 3. Le récit — structurer le message (SCQA + pyramide de Minto)
+
+> **La réponse d’abord.** La pyramide de Minto impose de donner la
+> conclusion *avant* les détails. Voici donc, en une phrase :
+
+> ## 🏆 Le Brésil est le grand favori de la Coupe du Monde 2026.
+
+Le récit complet, structuré selon le framework **SCQA** du cours :
+
+| Étape | Le récit |
+|----|----|
+| **S — Situation** | La Coupe du Monde 2026 réunit 48 équipes dans un format inédit (12 groupes, 104 matchs). Notre projet a construit un modèle d’apprentissage automatique entraîné sur **plus de 30 000 matchs internationaux** (1993 → 2026). |
+| **C — Complication** | Prédire un tournoi à élimination directe est un défi : l’aléa du football, l’avantage du terrain à neutraliser, et 104 matchs où la moindre surprise change tout. |
+| **Q — Question** | Peut-on désigner un favori **crédible** et, surtout, **quantifier honnêtement** sa probabilité de soulever le trophée ? |
+| **A — Answer** | Oui. Le modèle XGBoost simule l’intégralité du tournoi : il désigne le **Brésil** comme favori — mais dans une compétition qui reste très ouverte. |
+
+#### Traduire la technique en langage clair (le « dictionnaire du Data Translator »)
+
+Le cours insiste : on ne présente jamais une métrique brute à un
+non-spécialiste, on la **traduit**.
+
+| Métrique technique | Traduction pour le grand public |
+|----|----|
+| Accuracy = 0.588 | Le modèle voit juste **environ 3 fois sur 5** — là où parier systématiquement sur l’équipe à domicile ne réussit que dans 48 % des cas. |
+| ROC-AUC = 0.730 | Le modèle **sépare nettement** les équipes qui vont gagner de celles qui vont perdre (0.5 = pile ou face, 1.0 = parfait). |
+| Probabilité de titre = 23 % | Si l’on rejouait la Coupe du Monde 100 fois, le Brésil la gagnerait environ **23 fois** — favori net, mais loin d’une certitude. |
+
+### 4. Visualisations pour la restitution
+
+#### 4.1 Le grand favori — probabilités de titre
+
+La visualisation centrale du projet : la probabilité, pour chaque
+nation, de remporter la Coupe du Monde 2026 (issue des 20 000
+simulations Monte-Carlo).
+
+#### 4.2 Le podium prédit et les 12 vainqueurs de groupe
+
+#### 4.3 Vers une restitution interactive (recommandation)
+
+Le cours (§7.2) rappelle qu’*« en 2026, fournir un rapport PDF statique
+à un décideur n’est plus suffisant »*. Les graphiques ci-dessus,
+parfaits pour un rapport écrit, gagneraient à être déclinés en **tableau
+de bord interactif** permettant le *drill-down* (survol pour lire une
+valeur, filtrage par groupe, par confédération…).
+
+L’outil recommandé par le cours est **Plotly** (graphiques web
+interactifs), encapsulé dans une application **Streamlit** (idéal pour
+un prototype rapide). Exemple d’implémentation de la visualisation des
+favoris :
+
+``` python
+# Tableau de bord interactif — à déployer avec : streamlit run dashboard.py
+import streamlit as st
+import plotly.express as px
+import pandas as pd
+
+titres = pd.read_csv('data/processed/cdm2026_titres.csv')
+st.title('Coupe du Monde 2026 — Probabilités de titre')
+n = st.slider("Nombre d'équipes à afficher", 5, 32, 12)
+fig = px.bar(titres.head(n), x='proba_titre', y='equipe', orientation='h',
+             labels={'proba_titre': 'Probabilité de titre'})
+st.plotly_chart(fig)   # survol, zoom et filtres disponibles dans le navigateur
+```
+
+Ce livrable interactif constitue une **perspective naturelle** du
+projet, au-delà du rapport PDF.
+
+### 5. Transparence et communication de l’incertitude (§7.3 du cours)
+
+> *« Un dirigeant préférera toujours un expert qui maîtrise ses marges
+> d’erreur plutôt qu’un devin qui se trompe avec aplomb. »* — chapitre 7
+> du cours.
+
+Annoncer « le Brésil sera champion » serait une **faute de
+communication**. Le résultat honnête est probabiliste : le Brésil est
+favori **avec 23 % de chances** — ce qui signifie qu’il échouerait plus
+de **3 fois sur 4**. Le graphique ci-dessous montre à quel point le
+tournoi reste ouvert.
+
+#### Les deux visages de l’incertitude, et les limites du modèle
+
+Le cours distingue deux incertitudes — utile pour expliquer *pourquoi*
+la prédiction n’est pas une certitude :
+
+- **Incertitude aléatoire** (irréductible) : le football est
+  imprévisible par nature — un poteau, un carton rouge, un exploit
+  individuel. Aucune donnée ne supprimera jamais cette part de hasard.
+- **Incertitude épistémique** (réductible) : elle vient des **limites de
+  notre modèle**, et *peut* être réduite :
+  - le modèle ignore les **compositions d’équipe** (blessures,
+    suspensions, forme des joueurs clés) ;
+  - il prédit une **issue** (victoire/nul/défaite), pas un score, ni la
+    dynamique d’un tournoi ;
+  - il ne sait quasiment pas prévoir les **matchs nuls** (rappel ≈ 3 %,
+    vu au notebook 06) ;
+  - les **données récentes** (amicaux 2025-2026, qualifications) pèsent
+    autant qu’un match de 1995.
+
+**Pistes d’amélioration** (réduction de l’incertitude épistémique) :
+intégrer les effectifs réels, pondérer les matchs par leur ancienneté,
+ajouter des données de performance des joueurs.
+
+### 6. Recommandations et conclusion
+
+En appliquant une dernière fois le framework **O.I.A.** du cours à
+l’ensemble du projet :
+
+**🔎 Observation.** À partir de 30 000+ matchs internationaux, un modèle
+XGBoost (précision 59 %, ROC-AUC 0.73) a simulé toute la Coupe du Monde
+2026, de la phase de groupes à la finale.
+
+**💡 Insight.** Le Brésil ressort favori (**23 % de probabilité de
+titre**), devant l’Argentine (14 %) et la France (11 %). Mais aucune
+équipe ne dépasse 25 % : **la compétition est ouverte**, et les
+variables les plus prédictives sont l’écart de classement FIFA et la
+performance récente pondérée par la force des adversaires.
+
+**🎯 Action — recommandations.**
+
+1.  **Pour une rédaction sportive / des supporters** : communiquer le
+    Brésil comme favori, *toujours* assorti de sa probabilité (23 %) —
+    un récit honnête et engageant, pas une fausse certitude.
+2.  **Pour une fédération** : utiliser les probabilités de qualification
+    par tour comme outil d’**aide à la préparation** (identifier les
+    adversaires probables).
+3.  **Pour la suite du projet** : déployer le **tableau de bord
+    interactif** (Plotly / Streamlit) et enrichir le modèle avec les
+    données d’effectifs pour réduire l’incertitude épistémique.
+
+------------------------------------------------------------------------
+
+#### 🌉 Conclusion du projet
+
+Ce notebook clôt le **cycle complet de la donnée** : acquisition →
+nettoyage → visualisation → analyse exploratoire → modélisation →
+évaluation → **communication**. Parti d’un simple fichier de résultats
+de matchs, le projet aboutit à une prédiction chiffrée, évaluée et —
+surtout — **honnêtement communiquée** du vainqueur de la Coupe du Monde
+2026.
+
+> 🏆 **Prédiction finale : le Brésil, favori de la Coupe du Monde 2026
+> (23 % de probabilité de titre).**
 
 ## Présentation des Résultats (Livrables Interactifs)
 

@@ -139,6 +139,13 @@ finale, complétée par une validation Monte-Carlo (20 000 tirages), désigne le
 
 # Data Storytelling et Communication {#sec-storytelling}
 
+Un modèle qui ne convainc pas n'a aucune valeur. Cette dernière étape **traduit**
+les résultats techniques en un récit clair pour un public non spécialiste :
+structuration du message selon les frameworks SCQA et de la pyramide de Minto
+(la réponse d'abord), traduction des métriques en langage courant, et surtout
+communication **honnête de l'incertitude** — la prédiction finale est annoncée
+non comme une certitude, mais comme une probabilité assumée.
+
 ## Chapitre 7 : Travaux Pratiques de Storytelling
 {{< include ../build/notebooks/07_communication.qmd >}}
 
