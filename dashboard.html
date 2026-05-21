@@ -1,0 +1,1350 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aptispace Football Forecast</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root {
+      --bg: #eef3f7;
+      --ink: #07121f;
+      --muted: #667085;
+      --line: #d8e1ea;
+      --panel: #ffffff;
+      --navy: #08111f;
+      --navy-2: #111c2e;
+      --pitch: #08734d;
+      --pitch-2: #0b5f43;
+      --gold: #d6a229;
+      --blue: #2f6fd7;
+      --cyan: #12a6c8;
+      --red: #c94b55;
+      --orange: #d56f28;
+      --shadow: 0 18px 44px rgba(8, 18, 31, 0.12);
+      --stadium: url("https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Well_lit_soccer_stadium_%28Unsplash%29.jpg/1280px-Well_lit_soccer_stadium_%28Unsplash%29.jpg");
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: Inter, "Segoe UI", Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      letter-spacing: 0;
+    }
+
+    .hero-wrap {
+      position: relative;
+      color: #fff;
+      background:
+        linear-gradient(90deg, rgba(5, 12, 22, 0.98) 0%, rgba(8, 17, 31, 0.88) 43%, rgba(8, 17, 31, 0.62) 100%),
+        var(--stadium) center / cover no-repeat;
+      overflow: hidden;
+    }
+
+    .hero-wrap::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+
+    .shell {
+      position: relative;
+      z-index: 1;
+      width: min(1280px, calc(100% - 48px));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .brand-title {
+      margin: 0;
+      color: #f6fbff;
+      font-size: 15px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .brand-subtitle {
+      margin: 2px 0 0;
+      color: #b8c7db;
+      font-size: 12px;
+    }
+
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    nav a {
+      min-height: 34px;
+      padding: 8px 12px;
+      display: inline-flex;
+      align-items: center;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #d8e5f5;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 850;
+      background: rgba(255, 255, 255, 0.07);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 430px;
+      gap: 28px;
+      align-items: end;
+      min-height: 560px;
+      padding: 72px 0 44px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      min-height: 30px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      color: #b8fff0;
+      background: rgba(8, 115, 77, 0.24);
+      border: 1px solid rgba(95, 237, 190, 0.22);
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .tag::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 18px rgba(214, 162, 41, 0.9);
+    }
+
+    h1 {
+      margin: 18px 0 12px;
+      max-width: 780px;
+      font-size: clamp(44px, 6.8vw, 92px);
+      line-height: 0.92;
+      font-weight: 950;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      max-width: 620px;
+      margin: 0;
+      color: #d9e6f4;
+      font-size: 17px;
+      line-height: 1.55;
+    }
+
+    .hero-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      max-width: 720px;
+      margin-top: 26px;
+    }
+
+    .hero-chip {
+      padding: 12px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+    }
+
+    .hero-chip span {
+      display: block;
+      color: #aabbd0;
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .hero-chip strong {
+      display: block;
+      margin-top: 4px;
+      color: #fff;
+      font-size: 24px;
+      font-weight: 950;
+    }
+
+    .final-card {
+      border-radius: 8px;
+      overflow: hidden;
+      background: rgba(10, 18, 31, 0.80);
+      border: 1px solid rgba(255, 255, 255, 0.20);
+      box-shadow: 0 28px 72px rgba(0, 0, 0, 0.34);
+      backdrop-filter: blur(18px);
+    }
+
+    .final-top {
+      padding: 22px;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .team {
+      font-size: 26px;
+      font-weight: 950;
+    }
+
+    .flag {
+      display: inline-block;
+      width: 25px;
+      height: 18px;
+      margin-right: 8px;
+      border-radius: 3px;
+      object-fit: cover;
+      vertical-align: -2px;
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.45), 0 2px 8px rgba(0, 0, 0, 0.16);
+    }
+
+    .flag.dark {
+      box-shadow: 0 0 0 1px rgba(7, 18, 31, 0.14), 0 2px 8px rgba(0, 0, 0, 0.10);
+    }
+
+    .team.right { text-align: right; }
+
+    .vs {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #cfd9e7;
+      font-weight: 900;
+      font-size: 12px;
+    }
+
+    .final-result {
+      margin: 0 22px 22px;
+      padding: 18px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, rgba(8, 115, 77, 0.98), rgba(9, 95, 67, 0.98));
+      border: 1px solid rgba(123, 255, 207, 0.22);
+    }
+
+    .final-result span {
+      display: block;
+      color: #b9f8da;
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .final-result strong {
+      display: block;
+      margin: 8px 0 14px;
+      font-size: 42px;
+      line-height: 1;
+      font-weight: 950;
+    }
+
+    .progress {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .track {
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.18);
+      overflow: hidden;
+    }
+
+    .fill {
+      width: 56%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), #ffe7a0);
+      border-radius: inherit;
+    }
+
+    .scoreline {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .scoreline div {
+      padding: 14px 16px;
+      border-right: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .scoreline div:last-child { border-right: 0; }
+
+    .scoreline span {
+      display: block;
+      color: #aabbd0;
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .scoreline strong {
+      display: block;
+      margin-top: 4px;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 950;
+    }
+
+    main.shell {
+      padding: 22px 0 34px;
+    }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: -36px;
+      margin-bottom: 18px;
+    }
+
+    .kpi,
+    .panel {
+      border-radius: 8px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .kpi {
+      min-height: 124px;
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi::after {
+      content: "";
+      position: absolute;
+      right: 14px;
+      bottom: 14px;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      border: 8px solid rgba(47, 111, 215, 0.10);
+    }
+
+    .kpi.gold::after { border-color: rgba(214, 162, 41, 0.24); }
+    .kpi.green::after { border-color: rgba(8, 115, 77, 0.16); }
+    .kpi.red::after { border-color: rgba(201, 75, 85, 0.16); }
+
+    .kpi span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .kpi strong {
+      display: block;
+      margin-top: 8px;
+      color: var(--ink);
+      font-size: 32px;
+      line-height: 1;
+      font-weight: 950;
+    }
+
+    .kpi p {
+      margin: 9px 0 0;
+      max-width: 245px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.12fr) minmax(440px, 0.88fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      margin-bottom: 18px;
+      overflow: hidden;
+    }
+
+    .panel-head {
+      padding: 18px 18px 0;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .kicker {
+      margin: 0 0 4px;
+      color: var(--pitch);
+      font-size: 11px;
+      font-weight: 950;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      margin: 0;
+      color: var(--ink);
+      font-size: 21px;
+      line-height: 1.2;
+      font-weight: 950;
+    }
+
+    .note {
+      margin: 6px 0 0;
+      max-width: 620px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .badge {
+      flex: 0 0 auto;
+      padding: 7px 10px;
+      border-radius: 8px;
+      background: #eef7f3;
+      color: var(--pitch-2);
+      font-size: 11px;
+      font-weight: 950;
+      text-transform: uppercase;
+    }
+
+    .chart {
+      width: 100%;
+      min-height: 420px;
+    }
+
+    .chart.tall { min-height: 540px; }
+    .chart.medium { min-height: 420px; }
+    .chart.short { min-height: 320px; }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 14px 18px 0;
+    }
+
+    button {
+      appearance: none;
+      min-height: 34px;
+      padding: 7px 11px;
+      border-radius: 8px;
+      border: 1px solid #cbd7e4;
+      background: #fff;
+      color: #2b3648;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    button.active {
+      border-color: var(--pitch);
+      background: var(--pitch);
+      color: #fff;
+    }
+
+    .podium {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      padding: 18px;
+      min-height: 238px;
+      align-items: end;
+    }
+
+    .podium-card {
+      min-height: 160px;
+      display: flex;
+      flex-direction: column;
+      justify-content: end;
+      text-align: center;
+    }
+
+    .podium-team {
+      min-height: 32px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 950;
+    }
+
+    .podium-step {
+      border-radius: 8px 8px 3px 3px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 28px;
+      font-weight: 950;
+      box-shadow: inset 0 -18px 30px rgba(0, 0, 0, 0.14);
+    }
+
+    .p2 .podium-step { height: 106px; background: linear-gradient(180deg, #b3bdca, #758195); }
+    .p1 .podium-step { height: 152px; background: linear-gradient(180deg, #f0c85c, #c8911c); color: #1f1607; }
+    .p3 .podium-step { height: 82px; background: linear-gradient(180deg, #d78a53, #a75a32); }
+
+    .brief {
+      padding: 18px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .pipeline {
+      padding: 18px;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .pipeline-step {
+      min-height: 126px;
+      padding: 14px;
+      border-radius: 8px;
+      background: #f8fbfe;
+      border: 1px solid #e0e7ef;
+    }
+
+    .pipeline-step span {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      margin-bottom: 10px;
+      border-radius: 50%;
+      background: var(--pitch);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 950;
+    }
+
+    .pipeline-step strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 13px;
+      font-weight: 950;
+    }
+
+    .pipeline-step p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.42;
+    }
+
+    .brief-row {
+      display: grid;
+      grid-template-columns: 32px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 12px;
+      border: 1px solid #e0e7ef;
+      border-radius: 8px;
+      background: #f8fbfe;
+    }
+
+    .brief-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--navy);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 950;
+    }
+
+    .brief-row strong {
+      display: block;
+      margin-bottom: 3px;
+      font-size: 13px;
+    }
+
+    .brief-row span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .pro-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .pro-table th,
+    .pro-table td {
+      padding: 13px 15px;
+      border-top: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    .pro-table th {
+      background: #f7fafc;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 950;
+      text-transform: uppercase;
+    }
+
+    .pro-table td:first-child {
+      font-weight: 950;
+      color: var(--ink);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #edf7f3;
+      color: var(--pitch-2);
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .warning {
+      display: none;
+      margin: 12px 0;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #f1c66d;
+      background: #fff8e5;
+      color: #684800;
+      font-size: 13px;
+    }
+
+    footer {
+      padding: 4px 0 32px;
+      color: #7a8797;
+      font-size: 12px;
+    }
+
+    @media (max-width: 1060px) {
+      .hero,
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .final-card {
+        max-width: 680px;
+      }
+
+      .kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        margin-top: 18px;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .shell { width: min(100% - 28px, 1280px); }
+      .topbar { align-items: flex-start; flex-direction: column; padding: 14px 0; }
+      nav { justify-content: flex-start; }
+      .hero { min-height: auto; padding: 42px 0 28px; }
+      .hero-strip,
+      .kpis,
+      .podium,
+      .scoreline,
+      .pipeline {
+        grid-template-columns: 1fr;
+      }
+      .final-top { grid-template-columns: 1fr; }
+      .vs { display: none; }
+      .team.right { text-align: left; }
+      .chart,
+      .chart.short,
+      .chart.tall { min-height: 360px; }
+      .panel-head { display: block; }
+      .badge { display: inline-flex; margin-top: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="hero-wrap">
+    <div class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <div>
+            <p class="brand-title">Aptispace Football Forecast</p>
+            <p class="brand-subtitle">Prédiction internationale - 2026</p>
+          </div>
+        </div>
+        <nav aria-label="Navigation">
+          <a href="#demarche">Démarche</a>
+          <a href="#favoris">Favoris</a>
+          <a href="#modele">Modèle</a>
+          <a href="#decision">Décision</a>
+        </nav>
+      </header>
+
+      <div class="hero">
+        <div>
+          <span class="tag">Classification supervisée</span>
+          <h1>Brazil favori</h1>
+          <p class="lead">
+            Le modèle donne un favori, mais pas une certitude. La lecture utile :
+            mesurer l'écart entre les équipes, suivre les probabilités, et garder
+            l'incertitude au centre de l'analyse.
+          </p>
+          <div class="hero-strip">
+            <div class="hero-chip"><span>Matchs exploités</span><strong>30k+</strong></div>
+            <div class="hero-chip"><span>Accuracy test</span><strong>58,8 %</strong></div>
+            <div class="hero-chip"><span>Chance de titre</span><strong>23,4 %</strong></div>
+          </div>
+        </div>
+
+        <aside class="final-card" aria-label="Finale projetée">
+          <div class="final-top">
+            <div class="team"><img class="flag" src="https://flagcdn.com/w40/br.png" alt="">Brazil</div>
+            <div class="vs">VS</div>
+            <div class="team right"><img class="flag" src="https://flagcdn.com/w40/fr.png" alt="">France</div>
+          </div>
+          <div class="final-result">
+            <span>Finale projetée</span>
+            <strong>Brazil champion</strong>
+            <div class="progress">
+              <div class="track"><div class="fill"></div></div>
+              <b>56 %</b>
+            </div>
+          </div>
+          <div class="scoreline">
+            <div><span>Champion</span><strong><img class="flag" src="https://flagcdn.com/w40/br.png" alt="">Brazil</strong></div>
+            <div><span>Finaliste</span><strong><img class="flag" src="https://flagcdn.com/w40/fr.png" alt="">France</strong></div>
+            <div><span>Troisième</span><strong><img class="flag" src="https://flagcdn.com/w40/ar.png" alt="">Argentina</strong></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+  <main class="shell">
+    <div id="plotly-warning" class="warning">
+      Les graphiques interactifs n'ont pas pu etre charges.
+    </div>
+
+    <section class="kpis" aria-label="Indicateurs">
+      <article class="kpi gold">
+        <span>Favori au titre</span>
+        <strong><img class="flag dark" src="https://flagcdn.com/w40/br.png" alt="">Brazil</strong>
+        <p>Le favori ressort nettement, mais il gagne moins d'une simulation sur quatre.</p>
+      </article>
+      <article class="kpi green">
+        <span>Phase de groupes</span>
+        <strong>7,34 xPts</strong>
+        <p>Brazil est aussi l'équipe la plus forte dans la projection des groupes.</p>
+      </article>
+      <article class="kpi">
+        <span>Modèle</span>
+        <strong>+10,3 pts</strong>
+        <p>XGBoost bat clairement le réflexe naïf qui prédit toujours le favori domicile.</p>
+      </article>
+      <article class="kpi red">
+        <span>Point de vigilance</span>
+        <strong>Draw</strong>
+        <p>Les matchs nuls restent le vrai angle mort du modèle.</p>
+      </article>
+    </section>
+
+    <section id="demarche" class="panel">
+      <div class="panel-head">
+        <div>
+          <p class="kicker">Du jeu de données au pronostic</p>
+          <h2>La démarche en cinq temps</h2>
+          <p class="note">Le dashboard garde l'essentiel du projet : des données propres, des variables sportives lisibles, un modèle comparé à une baseline, puis une projection probabiliste.</p>
+        </div>
+      </div>
+      <div class="pipeline">
+        <div class="pipeline-step"><span>1</span><strong>Consolider</strong><p>Résultats, classements FIFA historisés, tirs au but et noms d'équipes harmonisés.</p></div>
+        <div class="pipeline-step"><span>2</span><strong>Nettoyer</strong><p>Scores invalides retirés, matchs 2026 isolés, rang FIFA manquant imputé.</p></div>
+        <div class="pipeline-step"><span>3</span><strong>Comprendre</strong><p>Avantage domicile, déséquilibre des classes et poids de l'écart FIFA.</p></div>
+        <div class="pipeline-step"><span>4</span><strong>Modéliser</strong><p>Classification supervisée avec variables différentielles et méthodes d'ensemble.</p></div>
+        <div class="pipeline-step"><span>5</span><strong>Projeter</strong><p>Groupes, phase finale, scénarios rejoués et communication de l'incertitude.</p></div>
+      </div>
+    </section>
+
+    <section id="modele" class="panel">
+      <div class="panel-head">
+        <div>
+          <p class="kicker">Qualité prédictive</p>
+          <h2>Le modèle bat-il une règle simple ?</h2>
+          <p class="note">Oui : XGBoost progresse nettement par rapport à la baseline, tout en gardant un écart train/test raisonnable.</p>
+        </div>
+        <span class="badge">XGBoost retenu</span>
+      </div>
+      <div id="model-comparison" class="chart short"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <p class="kicker">Variables</p>
+          <h2>Ce qui pèse vraiment</h2>
+          <p class="note">Le modèle ne regarde pas seulement le rang FIFA : il valorise aussi la forme, les buts et la force des adversaires.</p>
+        </div>
+      </div>
+      <div id="feature-impact" class="chart short"></div>
+    </section>
+
+    <div class="grid">
+      <div>
+        <section id="favoris" class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="kicker">Projection titre</p>
+              <h2>La course au trophée</h2>
+              <p class="note">Brazil mène la course, mais le total des poursuivants pèse encore plus lourd que le favori.</p>
+            </div>
+            <span class="badge">20 000 simulations</span>
+          </div>
+          <div id="title-race" class="chart"></div>
+        </section>
+
+        <section id="bracket" class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="kicker">Phase finale</p>
+              <h2>Le bracket, tour par tour</h2>
+              <p class="note">Chaque point représente un match. Plus il est grand, plus le modèle est confiant.</p>
+            </div>
+            <span class="badge">Des 16es à la finale</span>
+          </div>
+          <div class="toolbar" aria-label="Filtrer le tour">
+            <button class="active" type="button" data-round="all">Tous</button>
+            <button type="button" data-round="16es de finale">16es</button>
+            <button type="button" data-round="8es de finale">8es</button>
+            <button type="button" data-round="Quarts de finale">Quarts</button>
+            <button type="button" data-round="Demi-finales">Demies</button>
+            <button type="button" data-round="Finale">Finale</button>
+          </div>
+          <div id="knockout-map" class="chart tall"></div>
+        </section>
+
+      </div>
+
+      <aside>
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="kicker">Podium</p>
+              <h2>Scénario central</h2>
+            </div>
+          </div>
+          <div class="podium">
+            <div class="podium-card p2"><div class="podium-team"><img class="flag dark" src="https://flagcdn.com/w40/fr.png" alt="">France</div><div class="podium-step">2</div></div>
+            <div class="podium-card p1"><div class="podium-team"><img class="flag dark" src="https://flagcdn.com/w40/br.png" alt="">Brazil</div><div class="podium-step">1</div></div>
+            <div class="podium-card p3"><div class="podium-team"><img class="flag dark" src="https://flagcdn.com/w40/ar.png" alt="">Argentina</div><div class="podium-step">3</div></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="kicker">Incertitude</p>
+              <h2>Favori, pas certitude</h2>
+            </div>
+          </div>
+          <div id="uncertainty" class="chart short"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="kicker">Classes</p>
+              <h2>Où le modèle se trompe</h2>
+            </div>
+          </div>
+          <div id="class-balance" class="chart short"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="kicker">Groupes</p>
+              <h2>Top vainqueurs projetés</h2>
+            </div>
+          </div>
+          <div id="group-winners" class="chart medium"></div>
+        </section>
+      </aside>
+    </div>
+
+    <section id="decision" class="panel">
+      <div class="panel-head">
+        <div>
+          <p class="kicker">Lecture décisionnelle</p>
+          <h2>Ce qu'il faut retenir</h2>
+        </div>
+      </div>
+      <div class="brief">
+        <div class="brief-row">
+          <div class="brief-num">1</div>
+          <div><strong>Brazil est le meilleur scénario, pas une promesse.</strong><span>Avec 23,4 % de chances, il reste favori, mais il échoue encore dans la majorité des simulations.</span></div>
+        </div>
+        <div class="brief-row">
+          <div class="brief-num">2</div>
+          <div><strong>Les écarts de niveau donnent le signal principal.</strong><span>Le rang FIFA compte, mais les points pondérés par la force adverse et l'efficacité offensive affinent la lecture.</span></div>
+        </div>
+        <div class="brief-row">
+          <div class="brief-num">3</div>
+          <div><strong>Les matchs nuls restent le point fragile.</strong><span>Ils représentent 23,3 % de l'historique, mais le modèle les détecte très peu : c'est la limite à assumer.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <p class="kicker">Récapitulatif</p>
+          <h2>Résultats clés</h2>
+        </div>
+      </div>
+      <table class="pro-table">
+        <thead>
+          <tr>
+            <th>Indicateur</th>
+            <th>Valeur</th>
+            <th>Lecture</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Données exploitables</td>
+            <td>30 247 matchs</td>
+            <td>Base d'apprentissage propre après filtrage et feature engineering.</td>
+            <td><span class="pill">Fiable</span></td>
+          </tr>
+          <tr>
+            <td>Accuracy test</td>
+            <td>58,8 %</td>
+            <td>+10,3 points par rapport à la baseline naïve.</td>
+            <td><span class="pill">Solide</span></td>
+          </tr>
+          <tr>
+            <td>ROC-AUC</td>
+            <td>0,730</td>
+            <td>Bonne séparation globale des classes.</td>
+            <td><span class="pill">Exploitable</span></td>
+          </tr>
+          <tr>
+            <td>Recall draw</td>
+            <td>2,6 %</td>
+            <td>Risque fort sur les matchs nuls.</td>
+            <td><span class="pill">À améliorer</span></td>
+          </tr>
+          <tr>
+            <td>Signal principal</td>
+            <td>Points pondérés</td>
+            <td>La force des adversaires améliore la lecture du niveau réel.</td>
+            <td><span class="pill">Important</span></td>
+          </tr>
+          <tr>
+            <td>Favori au titre</td>
+            <td><img class="flag dark" src="https://flagcdn.com/w40/br.png" alt="">Brazil - 23,4 %</td>
+            <td>Favori net, compétition encore ouverte.</td>
+            <td><span class="pill">Scénario central</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <footer class="shell">Aptispace Football Forecast</footer>
+
+  <script>
+    const colors = {
+      ink: "#07121f",
+      muted: "#667085",
+      line: "#d8e1ea",
+      pitch: "#08734d",
+      pitch2: "#0b5f43",
+      gold: "#d6a229",
+      blue: "#2f6fd7",
+      cyan: "#12a6c8",
+      red: "#c94b55",
+      orange: "#d56f28",
+      gray: "#8a98aa"
+    };
+
+    const flags = {
+      "Argentina": "ar",
+      "Belgium": "be",
+      "Brazil": "br",
+      "England": "gb-eng",
+      "France": "fr",
+      "Germany": "de",
+      "Netherlands": "nl",
+      "Portugal": "pt",
+      "Spain": "es",
+      "Switzerland": "ch",
+      "United States": "us"
+    };
+
+    function flagUrl(team) {
+      const code = flags[team];
+      return code ? `https://flagcdn.com/w40/${code}.png` : "";
+    }
+
+    function flagImagesFor(rows, options = {}) {
+      const {
+        x = -0.7,
+        sizex = 0.55,
+        sizey = 0.46,
+        xref = "x",
+        yref = "y",
+        xanchor = "right",
+        yanchor = "middle"
+      } = options;
+
+      return rows
+        .map(row => {
+          const source = flagUrl(row.team);
+          if (!source) return null;
+          return { source, xref, yref, x, y: row.label, sizex, sizey, xanchor, yanchor, layer: "above" };
+        })
+        .filter(Boolean);
+    }
+
+    const titleRace = [
+      { team: "Brazil", proba: 23.4 },
+      { team: "Argentina", proba: 13.9 },
+      { team: "France", proba: 10.5 },
+      { team: "Spain", proba: 10.0 },
+      { team: "Germany", proba: 9.3 },
+      { team: "Netherlands", proba: 7.5 },
+      { team: "England", proba: 6.8 },
+      { team: "Portugal", proba: 5.1 }
+    ];
+
+    const bracketMatches = [
+      { round: "16es de finale", order: 1, match: "M73", a: "South Korea", b: "Canada", winner: "South Korea", p: 59 },
+      { round: "16es de finale", order: 2, match: "M74", a: "Brazil", b: "Uruguay", winner: "Brazil", p: 80 },
+      { round: "16es de finale", order: 3, match: "M75", a: "Germany", b: "Czech Republic", winner: "Germany", p: 87 },
+      { round: "16es de finale", order: 4, match: "M76", a: "Spain", b: "Scotland", winner: "Spain", p: 85 },
+      { round: "16es de finale", order: 5, match: "M77", a: "Ivory Coast", b: "Norway", winner: "Norway", p: 52 },
+      { round: "16es de finale", order: 6, match: "M78", a: "France", b: "Morocco", winner: "France", p: 81 },
+      { round: "16es de finale", order: 7, match: "M79", a: "Mexico", b: "Ecuador", winner: "Mexico", p: 63 },
+      { round: "16es de finale", order: 8, match: "M80", a: "England", b: "Sweden", winner: "England", p: 75 },
+      { round: "16es de finale", order: 9, match: "M81", a: "Belgium", b: "Austria", winner: "Belgium", p: 69 },
+      { round: "16es de finale", order: 10, match: "M82", a: "United States", b: "Bosnia and Herzegovina", winner: "United States", p: 79 },
+      { round: "16es de finale", order: 11, match: "M83", a: "Netherlands", b: "Algeria", winner: "Netherlands", p: 85 },
+      { round: "16es de finale", order: 12, match: "M84", a: "Portugal", b: "Croatia", winner: "Portugal", p: 65 },
+      { round: "16es de finale", order: 13, match: "M85", a: "Switzerland", b: "Iran", winner: "Switzerland", p: 62 },
+      { round: "16es de finale", order: 14, match: "M86", a: "Australia", b: "Egypt", winner: "Australia", p: 51 },
+      { round: "16es de finale", order: 15, match: "M87", a: "Argentina", b: "Japan", winner: "Argentina", p: 78 },
+      { round: "16es de finale", order: 16, match: "M88", a: "Colombia", b: "Turkey", winner: "Colombia", p: 63 },
+      { round: "8es de finale", order: 1, match: "M89", a: "South Korea", b: "Germany", winner: "Germany", p: 82 },
+      { round: "8es de finale", order: 2, match: "M90", a: "Brazil", b: "Norway", winner: "Brazil", p: 87 },
+      { round: "8es de finale", order: 3, match: "M91", a: "Spain", b: "France", winner: "France", p: 54 },
+      { round: "8es de finale", order: 4, match: "M92", a: "Mexico", b: "England", winner: "England", p: 62 },
+      { round: "8es de finale", order: 5, match: "M93", a: "Netherlands", b: "Portugal", winner: "Portugal", p: 52 },
+      { round: "8es de finale", order: 6, match: "M94", a: "Belgium", b: "United States", winner: "Belgium", p: 59 },
+      { round: "8es de finale", order: 7, match: "M95", a: "Australia", b: "Colombia", winner: "Colombia", p: 75 },
+      { round: "8es de finale", order: 8, match: "M96", a: "Switzerland", b: "Argentina", winner: "Argentina", p: 82 },
+      { round: "Quarts de finale", order: 1, match: "M97", a: "Germany", b: "Brazil", winner: "Brazil", p: 64 },
+      { round: "Quarts de finale", order: 2, match: "M98", a: "Portugal", b: "Belgium", winner: "Portugal", p: 59 },
+      { round: "Quarts de finale", order: 3, match: "M99", a: "France", b: "England", winner: "France", p: 52 },
+      { round: "Quarts de finale", order: 4, match: "M100", a: "Colombia", b: "Argentina", winner: "Argentina", p: 62 },
+      { round: "Demi-finales", order: 1, match: "M101", a: "Brazil", b: "Portugal", winner: "Brazil", p: 72 },
+      { round: "Demi-finales", order: 2, match: "M102", a: "France", b: "Argentina", winner: "France", p: 51 },
+      { round: "Finale", order: 1, match: "M104", a: "Brazil", b: "France", winner: "Brazil", p: 56 }
+    ];
+
+    const modelRows = [
+      { name: "Baseline", train: 48.5, test: 48.5 },
+      { name: "Random Forest", train: 64.7, test: 55.8 },
+      { name: "XGBoost", train: 64.2, test: 58.8 }
+    ];
+
+    const features = [
+      { name: "Points pondérés", value: 0.202 },
+      { name: "Buts / force adverse", value: 0.151 },
+      { name: "Buts encaisses", value: 0.149 },
+      { name: "Écart FIFA", value: 0.140 },
+      { name: "Niveau adversaires", value: 0.091 }
+    ];
+
+    const classes = [
+      { name: "home_win", share: 48.5, recall: 87.3, f1: 71.8 },
+      { name: "away_win", share: 28.2, recall: 56.3, f1: 56.2 },
+      { name: "draw", share: 23.3, recall: 2.6, f1: 4.7 }
+    ];
+
+    const groupWinners = [
+      { team: "Brazil", group: "C", xpts: 7.34 },
+      { team: "Spain", group: "F", xpts: 7.15 },
+      { team: "Argentina", group: "J", xpts: 7.04 },
+      { team: "England", group: "L", xpts: 6.97 },
+      { team: "France", group: "I", xpts: 6.89 },
+      { team: "Germany", group: "E", xpts: 6.59 }
+    ];
+
+    const roundOrder = ["16es de finale", "8es de finale", "Quarts de finale", "Demi-finales", "Finale"];
+    const config = { responsive: true, displaylogo: false, modeBarButtonsToRemove: ["lasso2d", "select2d"] };
+
+    const layoutBase = {
+      paper_bgcolor: "rgba(0,0,0,0)",
+      plot_bgcolor: "rgba(0,0,0,0)",
+      font: { family: "Inter, Segoe UI, Arial, sans-serif", color: colors.ink },
+      hoverlabel: { bgcolor: "#ffffff", bordercolor: colors.line, font: { color: colors.ink } }
+    };
+
+    function axisGrid(title = "") {
+      return { title, gridcolor: "#e6edf5", zeroline: false };
+    }
+
+    function renderTitleRace() {
+      const data = [...titleRace].reverse().map(d => ({ ...d, label: d.team }));
+      Plotly.newPlot("title-race", [
+        {
+          type: "bar",
+          orientation: "h",
+          y: data.map(d => d.label),
+          x: data.map(d => d.proba),
+          width: 0.28,
+          marker: { color: "rgba(47,111,215,0.20)", line: { width: 0 } },
+          hoverinfo: "skip"
+        },
+        {
+          type: "scatter",
+          mode: "markers+text",
+          y: data.map(d => d.label),
+          x: data.map(d => d.proba),
+          marker: {
+            size: data.map(d => d.team === "Brazil" ? 24 : 17),
+            color: data.map(d => d.team === "Brazil" ? colors.gold : colors.pitch),
+            line: { color: "#ffffff", width: 2 }
+          },
+          text: data.map(d => `${d.proba.toFixed(1)} %`),
+          textposition: "middle right",
+          textfont: { size: 12, color: colors.ink },
+          hovertemplate: "%{y}<br>Chance de titre : %{x:.1f} %<extra></extra>"
+        }
+      ], {
+        ...layoutBase,
+        margin: { l: 118, r: 44, t: 20, b: 54 },
+        xaxis: { ...axisGrid("Probabilité de titre (%)"), range: [0, 27] },
+        yaxis: { automargin: true },
+        showlegend: false,
+        shapes: [
+          { type: "line", x0: 25, x1: 25, y0: -0.6, y1: data.length - 0.4, line: { color: "#cbd5e1", width: 1, dash: "dot" } }
+        ],
+        annotations: [
+          { x: 25, y: data.length - 0.2, text: "aucun favori > 25 %", showarrow: false, font: { size: 11, color: colors.muted } }
+        ],
+        images: flagImagesFor(data)
+      }, config);
+    }
+
+    function renderKnockout(round = "all") {
+      const rows = round === "all" ? bracketMatches : bracketMatches.filter(d => d.round === round);
+      const yLabels = rows.map(d => `${d.match}  ${d.a} - ${d.b}`);
+      Plotly.react("knockout-map", [{
+        type: "scatter",
+        mode: "markers+text",
+        x: rows.map(d => d.round),
+        y: yLabels,
+        text: rows.map(d => d.winner),
+        textposition: "middle right",
+        textfont: { size: 11, color: colors.ink },
+        marker: {
+          size: rows.map(d => 12 + (d.p - 50) * 0.9),
+          color: rows.map(d => d.winner === "Brazil" ? colors.gold : d.p < 55 ? colors.red : colors.pitch),
+          opacity: 0.88,
+          line: { color: "#ffffff", width: 2 }
+        },
+        customdata: rows.map(d => `${d.winner} (${d.p} %)`) ,
+        hovertemplate: "%{y}<br>Vainqueur : %{customdata}<extra></extra>"
+      }], {
+        ...layoutBase,
+        height: round === "all" ? 780 : Math.max(360, rows.length * 48 + 150),
+        margin: { l: 190, r: 48, t: 20, b: 70 },
+        xaxis: { categoryorder: "array", categoryarray: roundOrder, gridcolor: "#e6edf5", zeroline: false },
+        yaxis: { automargin: true, autorange: "reversed" },
+        showlegend: false
+      }, config);
+    }
+
+    function renderModelComparison() {
+      Plotly.newPlot("model-comparison", [
+        {
+          type: "bar",
+          name: "Train",
+          x: modelRows.map(d => d.name),
+          y: modelRows.map(d => d.train),
+          marker: { color: "rgba(47,111,215,0.35)" },
+          hovertemplate: "%{x}<br>Train : %{y:.1f} %<extra></extra>"
+        },
+        {
+          type: "bar",
+          name: "Test",
+          x: modelRows.map(d => d.name),
+          y: modelRows.map(d => d.test),
+          marker: { color: [colors.gray, colors.pitch, colors.gold] },
+          text: modelRows.map(d => `${d.test.toFixed(1)} %`),
+          textposition: "outside",
+          hovertemplate: "%{x}<br>Test : %{y:.1f} %<extra></extra>"
+        }
+      ], {
+        ...layoutBase,
+        margin: { l: 58, r: 28, t: 24, b: 58 },
+        barmode: "group",
+        yaxis: { ...axisGrid("Accuracy (%)"), range: [0, 72] },
+        legend: { orientation: "h", y: 1.12, x: 0 }
+      }, config);
+    }
+
+    function renderFeatureImpact() {
+      const data = [...features].reverse();
+      Plotly.newPlot("feature-impact", [{
+        type: "bar",
+        orientation: "h",
+        y: data.map(d => d.name),
+        x: data.map(d => d.value),
+        marker: { color: data.map((_, i) => i === data.length - 1 ? colors.gold : colors.pitch) },
+        text: data.map(d => d.value.toFixed(3)),
+        textposition: "outside",
+        hovertemplate: "%{y}<br>Importance : %{x:.3f}<extra></extra>"
+      }], {
+        ...layoutBase,
+        margin: { l: 150, r: 42, t: 22, b: 54 },
+        xaxis: { ...axisGrid("Importance"), range: [0, 0.235] },
+        yaxis: { automargin: true },
+        showlegend: false
+      }, config);
+    }
+
+    function renderUncertainty() {
+      Plotly.newPlot("uncertainty", [{
+        type: "pie",
+        hole: 0.66,
+        labels: ["Brazil", "Argentina", "France", "Autres"],
+        values: [23.4, 13.9, 10.5, 52.2],
+        marker: { colors: [colors.gold, colors.pitch, colors.blue, "#d6dee8"], line: { color: "#ffffff", width: 3 } },
+        textinfo: "label+percent",
+        hovertemplate: "%{label}<br>%{value:.1f} %<extra></extra>"
+      }], {
+        ...layoutBase,
+        margin: { l: 8, r: 8, t: 12, b: 12 },
+        showlegend: false,
+        annotations: [{ text: "ouvert", x: 0.5, y: 0.5, showarrow: false, font: { size: 20, color: colors.ink } }]
+      }, config);
+    }
+
+    function renderClassBalance() {
+      Plotly.newPlot("class-balance", [
+        {
+          type: "bar",
+          orientation: "h",
+          name: "Poids historique",
+          y: classes.map(d => d.name).reverse(),
+          x: classes.map(d => d.share).reverse(),
+          marker: { color: "rgba(47,111,215,0.30)" },
+          hovertemplate: "%{y}<br>Poids : %{x:.1f} %<extra></extra>"
+        },
+        {
+          type: "scatter",
+          mode: "markers+text",
+          name: "Rappel",
+          y: classes.map(d => d.name).reverse(),
+          x: classes.map(d => d.recall).reverse(),
+          marker: { size: 15, color: [colors.pitch, colors.red, colors.pitch] },
+          text: classes.map(d => `${d.recall.toFixed(1)} %`).reverse(),
+          textposition: "middle right",
+          hovertemplate: "%{y}<br>Rappel : %{x:.1f} %<extra></extra>"
+        }
+      ], {
+        ...layoutBase,
+        margin: { l: 88, r: 38, t: 18, b: 46 },
+        xaxis: { ...axisGrid("%"), range: [0, 95] },
+        yaxis: { automargin: true },
+        legend: { orientation: "h", y: 1.14, x: 0 }
+      }, config);
+    }
+
+    function renderGroupWinners() {
+      const data = [...groupWinners].reverse().map(d => ({ ...d, label: `${d.team} (${d.group})` }));
+      Plotly.newPlot("group-winners", [{
+        type: "bar",
+        orientation: "h",
+        y: data.map(d => d.label),
+        x: data.map(d => d.xpts),
+        marker: { color: data.map(d => d.team === "Brazil" ? colors.gold : colors.pitch) },
+        text: data.map(d => d.xpts.toFixed(2)),
+        textposition: "outside",
+        hovertemplate: "%{y}<br>xPts : %{x:.2f}<extra></extra>"
+      }], {
+        ...layoutBase,
+        height: 420,
+        margin: { l: 118, r: 18, t: 28, b: 54 },
+        xaxis: { ...axisGrid("xPts"), range: [0, 8.1] },
+        yaxis: { automargin: true, tickfont: { size: 12 } },
+        showlegend: false,
+        images: flagImagesFor(data, { x: -0.25, sizex: 0.42, sizey: 0.38 })
+      }, config);
+    }
+
+    function bindRoundFilters() {
+      document.querySelectorAll("[data-round]").forEach(button => {
+        button.addEventListener("click", () => {
+          document.querySelectorAll("[data-round]").forEach(btn => btn.classList.remove("active"));
+          button.classList.add("active");
+          renderKnockout(button.dataset.round);
+        });
+      });
+    }
+
+    function renderDashboard() {
+      if (!window.Plotly) {
+        document.getElementById("plotly-warning").style.display = "block";
+        return;
+      }
+      renderTitleRace();
+      renderKnockout();
+      renderModelComparison();
+      renderFeatureImpact();
+      renderUncertainty();
+      renderClassBalance();
+      renderGroupWinners();
+      bindRoundFilters();
+    }
+
+    renderDashboard();
+  </script>
+</body>
+</html>

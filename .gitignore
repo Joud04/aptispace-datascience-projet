@@ -33,5 +33,7 @@ Thumbs.db
 
 *.pdf
 *.html
+!dashboard.html
+!dashboard_operational.html
 /.quarto/
 **/*.quarto_ipynb

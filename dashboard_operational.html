@@ -1,0 +1,864 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aptispace Football Dashboard</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root {
+      --page: #dfe7ee;
+      --sidebar: #0a2840;
+      --sidebar-dark: #061a2b;
+      --panel: #ffffff;
+      --ink: #111d2f;
+      --muted: #697789;
+      --line: #d9e2ec;
+      --blue: #1f6fd1;
+      --green: #0d7a55;
+      --gold: #d9a528;
+      --red: #c94b55;
+      --shadow: 0 18px 42px rgba(19, 34, 52, 0.18);
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      margin: 0;
+      display: grid;
+      place-items: center;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.50), rgba(255,255,255,0)),
+        var(--page);
+      color: var(--ink);
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      letter-spacing: 0;
+    }
+
+    .app {
+      width: min(1420px, calc(100vw - 28px));
+      height: min(880px, calc(100vh - 28px));
+      display: grid;
+      grid-template-columns: 212px minmax(0, 1fr);
+      background: #f5f8fb;
+      border: 1px solid rgba(255,255,255,0.8);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    aside {
+      background: linear-gradient(180deg, var(--sidebar), var(--sidebar-dark));
+      color: #ffffff;
+      padding: 22px 16px;
+      min-height: 0;
+    }
+
+    .profile {
+      padding: 4px 0 22px;
+      margin-bottom: 18px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.14);
+    }
+
+    .avatar {
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 12px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: #ffffff;
+      color: var(--sidebar);
+      font-size: 24px;
+      font-weight: 950;
+      box-shadow: 0 0 0 6px rgba(255,255,255,0.08);
+    }
+
+    .profile strong {
+      display: block;
+      font-size: 14px;
+      text-transform: uppercase;
+    }
+
+    .profile span {
+      display: block;
+      margin-top: 4px;
+      color: #aebfd0;
+      font-size: 11px;
+    }
+
+    .nav {
+      display: grid;
+      gap: 7px;
+    }
+
+    .nav button {
+      width: 100%;
+      min-height: 40px;
+      border: 0;
+      border-radius: 8px;
+      padding: 9px 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: transparent;
+      color: #c8d5e5;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 850;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .nav button.active,
+    .nav button:hover {
+      background: rgba(255,255,255,0.11);
+      color: #fff;
+    }
+
+    .ico {
+      width: 19px;
+      text-align: center;
+    }
+
+    main {
+      min-width: 0;
+      min-height: 0;
+      padding: 18px;
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      gap: 14px;
+      overflow: hidden;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.1;
+      font-weight: 950;
+    }
+
+    .subtitle {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .status {
+      min-height: 34px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: 0 9px 24px rgba(31, 48, 70, 0.08);
+      overflow: hidden;
+    }
+
+    .kpi {
+      min-height: 94px;
+      padding: 13px;
+      position: relative;
+    }
+
+    .kpi::after {
+      content: "";
+      position: absolute;
+      right: -28px;
+      bottom: -28px;
+      width: 82px;
+      height: 82px;
+      border-radius: 50%;
+      background: rgba(31,111,209,0.10);
+    }
+
+    .kpi.gold::after { background: rgba(217,165,40,0.18); }
+    .kpi.green::after { background: rgba(13,122,85,0.14); }
+    .kpi.red::after { background: rgba(201,75,85,0.14); }
+
+    .kpi-label {
+      margin: 0 0 7px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 950;
+      text-transform: uppercase;
+    }
+
+    .kpi-value {
+      margin: 0;
+      color: var(--ink);
+      font-size: 26px;
+      line-height: 1;
+      font-weight: 950;
+    }
+
+    .kpi-note {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.25;
+    }
+
+    .views {
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .view {
+      display: none;
+      height: 100%;
+      min-height: 0;
+      gap: 14px;
+    }
+
+    .view.active { display: grid; }
+
+    .overview-grid {
+      grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.72fr);
+      grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .model-grid {
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .tournament-grid,
+    .teams-grid,
+    .decision-grid {
+      grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.72fr);
+      grid-template-rows: minmax(0, 1fr);
+    }
+
+    .span-2 { grid-row: span 2; }
+
+    .panel {
+      min-width: 0;
+      min-height: 0;
+      padding: 13px 13px 8px;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 7px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.15;
+      font-weight: 950;
+    }
+
+    .note {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .badge {
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: #fff4d6;
+      color: #8a5e00;
+      font-size: 10px;
+      font-weight: 950;
+      white-space: nowrap;
+      text-transform: uppercase;
+    }
+
+    .chart {
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+    }
+
+    .champion {
+      padding: 16px;
+      text-align: center;
+      display: grid;
+      align-content: center;
+    }
+
+    .ring {
+      width: 132px;
+      height: 132px;
+      margin: 8px auto 12px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at center, #fff 0 54%, transparent 55%),
+        conic-gradient(var(--gold) 0 84.2deg, #e9eef4 84.2deg 360deg);
+    }
+
+    .ring strong {
+      font-size: 27px;
+      font-weight: 950;
+    }
+
+    .champion h3 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 950;
+    }
+
+    .champion p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .table-panel {
+      padding: 13px;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      align-self: start;
+    }
+
+    th,
+    td {
+      padding: 8px 7px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 950;
+      text-transform: uppercase;
+    }
+
+    td:first-child { font-weight: 850; }
+
+    .flag {
+      width: 23px;
+      height: 16px;
+      margin-right: 6px;
+      border-radius: 3px;
+      object-fit: cover;
+      vertical-align: -3px;
+      box-shadow: 0 0 0 1px rgba(18, 32, 51, 0.12);
+    }
+
+    .insights {
+      padding: 14px;
+      display: grid;
+      align-content: center;
+      gap: 10px;
+    }
+
+    .insight {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 10px;
+      padding: 11px;
+      border: 1px solid var(--line);
+      background: #f8fbfe;
+    }
+
+    .num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--sidebar);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 950;
+    }
+
+    .insight strong {
+      display: block;
+      margin-bottom: 3px;
+      font-size: 12px;
+    }
+
+    .insight span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    @media (max-width: 1080px) {
+      body { overflow: auto; display: block; }
+      .app {
+        width: 100%;
+        height: auto;
+        min-height: 100vh;
+        grid-template-columns: 1fr;
+      }
+      aside { display: none; }
+      main { overflow: visible; }
+      .views { overflow: visible; }
+      .view,
+      .view.active {
+        display: grid;
+        height: auto;
+        grid-template-columns: 1fr;
+        grid-template-rows: none;
+      }
+      .panel { min-height: 320px; }
+      .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <div class="profile">
+        <div class="avatar">AF</div>
+        <strong>Aptispace</strong>
+        <span>Football Forecast</span>
+      </div>
+      <nav class="nav" aria-label="Menu du dashboard">
+        <button class="active" type="button" data-view="overview"><span class="ico">⌂</span> Vue globale</button>
+        <button type="button" data-view="model"><span class="ico">◆</span> Modèle</button>
+        <button type="button" data-view="tournament"><span class="ico">▣</span> Tournoi</button>
+        <button type="button" data-view="teams"><span class="ico">●</span> Équipes</button>
+        <button type="button" data-view="decision"><span class="ico">✓</span> Décision</button>
+      </nav>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div>
+          <h1 id="view-title">Brazil favori, tournoi ouvert</h1>
+          <p id="view-subtitle" class="subtitle">Les indicateurs essentiels sur le modèle et la projection CDM 2026.</p>
+        </div>
+        <div id="view-status" class="status">Vue globale</div>
+      </header>
+
+      <section id="kpis" class="kpis" aria-label="Indicateurs clés"></section>
+
+      <section class="views">
+        <div class="view overview-grid active" data-panel="overview">
+          <section class="card panel span-2">
+            <div class="panel-head">
+              <div><h2>Phase finale simulée</h2><p class="note">La taille du point indique la confiance du modèle.</p></div>
+              <span class="badge">Bracket</span>
+            </div>
+            <div id="overview-knockout" class="chart"></div>
+          </section>
+          <section class="card champion">
+            <h2>Probabilité du favori</h2>
+            <div class="ring"><strong>23%</strong></div>
+            <h3><img class="flag" src="https://flagcdn.com/w40/br.png" alt="">Brazil</h3>
+            <p>Favori net, mais pas assez haut pour parler de certitude.</p>
+          </section>
+          <section class="card panel">
+            <div class="panel-head">
+              <div><h2>Course au titre</h2><p class="note">Top favoris par probabilité.</p></div>
+            </div>
+            <div id="overview-title-race" class="chart"></div>
+          </section>
+        </div>
+
+        <div class="view model-grid" data-panel="model">
+          <section class="card panel span-2">
+            <div class="panel-head">
+              <div><h2>Modèle vs règle simple</h2><p class="note">XGBoost bat la baseline avec un écart train/test contenu.</p></div>
+              <span class="badge">XGBoost retenu</span>
+            </div>
+            <div id="model-comparison" class="chart"></div>
+          </section>
+          <section class="card panel">
+            <div class="panel-head">
+              <div><h2>Variables clés</h2><p class="note">Ce qui pèse dans la décision.</p></div>
+            </div>
+            <div id="feature-impact" class="chart"></div>
+          </section>
+          <section class="card panel">
+            <div class="panel-head">
+              <div><h2>Classes prédites</h2><p class="note">Le nul reste mal capté.</p></div>
+            </div>
+            <div id="class-balance" class="chart"></div>
+          </section>
+        </div>
+
+        <div class="view tournament-grid" data-panel="tournament">
+          <section class="card panel">
+            <div class="panel-head">
+              <div><h2>Phase finale simulée</h2><p class="note">Des 16es jusqu'à la finale.</p></div>
+            </div>
+            <div id="tournament-knockout" class="chart"></div>
+          </section>
+          <section class="card table-panel">
+            <div class="panel-head">
+              <div><h2>Podium projeté</h2><p class="note">Scénario central du bracket.</p></div>
+            </div>
+            <table>
+              <thead><tr><th>Place</th><th>Équipe</th><th>Lecture</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td><img class="flag" src="https://flagcdn.com/w40/br.png" alt="">Brazil</td><td>Champion projeté</td></tr>
+                <tr><td>2</td><td><img class="flag" src="https://flagcdn.com/w40/fr.png" alt="">France</td><td>Finaliste</td></tr>
+                <tr><td>3</td><td><img class="flag" src="https://flagcdn.com/w40/ar.png" alt="">Argentina</td><td>Troisième</td></tr>
+              </tbody>
+            </table>
+          </section>
+        </div>
+
+        <div class="view teams-grid" data-panel="teams">
+          <section class="card panel">
+            <div class="panel-head">
+              <div><h2>Course au titre</h2><p class="note">Le champ des possibles reste large.</p></div>
+              <span class="badge">20 000 simulations</span>
+            </div>
+            <div id="teams-title-race" class="chart"></div>
+          </section>
+          <section class="card table-panel">
+            <div class="panel-head">
+              <div><h2>Top vainqueurs de groupes</h2><p class="note">Classement par points espérés.</p></div>
+            </div>
+            <table>
+              <thead><tr><th>Équipe</th><th>Groupe</th><th>xPts</th></tr></thead>
+              <tbody>
+                <tr><td><img class="flag" src="https://flagcdn.com/w40/br.png" alt="">Brazil</td><td>C</td><td>7,34</td></tr>
+                <tr><td><img class="flag" src="https://flagcdn.com/w40/es.png" alt="">Spain</td><td>F</td><td>7,15</td></tr>
+                <tr><td><img class="flag" src="https://flagcdn.com/w40/ar.png" alt="">Argentina</td><td>J</td><td>7,04</td></tr>
+                <tr><td><img class="flag" src="https://flagcdn.com/w40/gb-eng.png" alt="">England</td><td>L</td><td>6,97</td></tr>
+                <tr><td><img class="flag" src="https://flagcdn.com/w40/fr.png" alt="">France</td><td>I</td><td>6,89</td></tr>
+                <tr><td><img class="flag" src="https://flagcdn.com/w40/de.png" alt="">Germany</td><td>E</td><td>6,59</td></tr>
+              </tbody>
+            </table>
+          </section>
+        </div>
+
+        <div class="view decision-grid" data-panel="decision">
+          <section class="card insights">
+            <div class="insight"><div class="num">1</div><div><strong>Favori, pas promesse</strong><span>Brazil gagne 23,4 % des simulations. C'est le scénario le plus fréquent, pas une certitude.</span></div></div>
+            <div class="insight"><div class="num">2</div><div><strong>Signal sportif réel</strong><span>Forme, buts et force adverse complètent le rang FIFA et expliquent mieux le niveau réel.</span></div></div>
+            <div class="insight"><div class="num">3</div><div><strong>Limite assumée</strong><span>Les matchs nuls représentent 23,3 % de l'historique, mais le modèle les détecte mal.</span></div></div>
+          </section>
+          <section class="card table-panel">
+            <div class="panel-head">
+              <div><h2>Récapitulatif</h2><p class="note">Les chiffres à garder en tête.</p></div>
+            </div>
+            <table>
+              <thead><tr><th>Indicateur</th><th>Valeur</th><th>Lecture</th></tr></thead>
+              <tbody>
+                <tr><td>Accuracy test</td><td>58,8 %</td><td>+10,3 pts vs baseline</td></tr>
+                <tr><td>ROC-AUC</td><td>0,730</td><td>Bonne séparation globale</td></tr>
+                <tr><td>Recall draw</td><td>2,6 %</td><td>Point faible majeur</td></tr>
+                <tr><td>Signal principal</td><td>Points pondérés</td><td>Force adverse intégrée</td></tr>
+                <tr><td>Favori</td><td>Brazil 23,4 %</td><td>Tournoi ouvert</td></tr>
+              </tbody>
+            </table>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const colors = {
+      ink: "#111d2f",
+      muted: "#697789",
+      line: "#d9e2ec",
+      blue: "#1f6fd1",
+      green: "#0d7a55",
+      gold: "#d9a528",
+      red: "#c94b55",
+      gray: "#8a98aa"
+    };
+
+    const viewMeta = {
+      overview: {
+        title: "Brazil favori, tournoi ouvert",
+        subtitle: "Les indicateurs essentiels sur le modèle et la projection CDM 2026.",
+        status: "Vue globale",
+        kpis: [
+          ["Champion projeté", "Brazil", "Scénario central de la phase finale.", "gold", "https://flagcdn.com/w40/br.png"],
+          ["Chance de titre", "23,4 %", "Sur 20 000 simulations du tournoi.", "green"],
+          ["Accuracy test", "58,8 %", "+10,3 points vs baseline naïve.", ""],
+          ["Point faible", "Draw", "Rappel très faible sur les matchs nuls.", "red"]
+        ]
+      },
+      model: {
+        title: "Performance du modèle",
+        subtitle: "On vérifie que le modèle apprend réellement plus qu'une règle simple.",
+        status: "Modèle",
+        kpis: [
+          ["Modèle retenu", "XGBoost", "Meilleure accuracy test.", "gold"],
+          ["Baseline", "48,5 %", "Toujours prédire home_win.", ""],
+          ["Gain", "+10,3 pts", "Écart face à la baseline.", "green"],
+          ["ROC-AUC", "0,730", "Bonne séparation globale.", ""]
+        ]
+      },
+      tournament: {
+        title: "Simulation de la phase finale",
+        subtitle: "Chaque match avance l'équipe la plus probable, terrain neutralisé.",
+        status: "Tournoi",
+        kpis: [
+          ["Finale", "Brazil - France", "Brazil gagne avec 56 %.", "gold"],
+          ["Champion", "Brazil", "Scénario déterministe.", "green", "https://flagcdn.com/w40/br.png"],
+          ["Troisième", "Argentina", "Podium projeté.", "", "https://flagcdn.com/w40/ar.png"],
+          ["Méthode", "Simulation", "20 000 scénarios rejoués.", ""]
+        ]
+      },
+      teams: {
+        title: "Lecture par équipes",
+        subtitle: "Les favoris combinent force de groupe, forme et chemin de tournoi.",
+        status: "Équipes",
+        kpis: [
+          ["Top groupe", "Brazil", "7,34 points espérés.", "gold", "https://flagcdn.com/w40/br.png"],
+          ["2e groupe", "Spain", "7,15 points espérés.", "", "https://flagcdn.com/w40/es.png"],
+          ["3e groupe", "Argentina", "7,04 points espérés.", "", "https://flagcdn.com/w40/ar.png"],
+          ["Favori titre", "Brazil", "23,4 % de chance de titre.", "green", "https://flagcdn.com/w40/br.png"]
+        ]
+      },
+      decision: {
+        title: "Lecture décisionnelle",
+        subtitle: "Ce qu'il faut retenir sans sur-vendre la prédiction.",
+        status: "Décision",
+        kpis: [
+          ["Message clé", "Favori ≠ certain", "Brazil reste sous 25 %.", "gold"],
+          ["Signal fort", "Écart de niveau", "FIFA + forme + adversaires.", "green"],
+          ["Risque", "Draw", "Classe mal détectée.", "red"],
+          ["Suite utile", "Effectifs", "Blessures et joueurs à ajouter.", ""]
+        ]
+      }
+    };
+
+    const titleRace = [
+      { team: "Brazil", proba: 23.4 },
+      { team: "Argentina", proba: 13.9 },
+      { team: "France", proba: 10.5 },
+      { team: "Spain", proba: 10.0 },
+      { team: "Germany", proba: 9.3 },
+      { team: "Netherlands", proba: 7.5 },
+      { team: "England", proba: 6.8 },
+      { team: "Portugal", proba: 5.1 }
+    ];
+
+    const modelRows = [
+      { name: "Baseline", train: 48.5, test: 48.5 },
+      { name: "Random Forest", train: 64.7, test: 55.8 },
+      { name: "XGBoost", train: 64.2, test: 58.8 }
+    ];
+
+    const features = [
+      { name: "Points pondérés", value: 0.202 },
+      { name: "Buts / adversaire", value: 0.151 },
+      { name: "Buts encaissés", value: 0.149 },
+      { name: "Écart FIFA", value: 0.140 },
+      { name: "Niveau adversaires", value: 0.091 }
+    ];
+
+    const classes = [
+      { name: "home_win", share: 48.5, recall: 87.3 },
+      { name: "away_win", share: 28.2, recall: 56.3 },
+      { name: "draw", share: 23.3, recall: 2.6 }
+    ];
+
+    const bracketMatches = [
+      { round: "16es", match: "M73", label: "South Korea - Canada", winner: "South Korea", p: 59 },
+      { round: "16es", match: "M74", label: "Brazil - Uruguay", winner: "Brazil", p: 80 },
+      { round: "16es", match: "M75", label: "Germany - Czech Republic", winner: "Germany", p: 87 },
+      { round: "16es", match: "M76", label: "Spain - Scotland", winner: "Spain", p: 85 },
+      { round: "16es", match: "M77", label: "Ivory Coast - Norway", winner: "Norway", p: 52 },
+      { round: "16es", match: "M78", label: "France - Morocco", winner: "France", p: 81 },
+      { round: "16es", match: "M79", label: "Mexico - Ecuador", winner: "Mexico", p: 63 },
+      { round: "16es", match: "M80", label: "England - Sweden", winner: "England", p: 75 },
+      { round: "8es", match: "M89", label: "South Korea - Germany", winner: "Germany", p: 82 },
+      { round: "8es", match: "M90", label: "Brazil - Norway", winner: "Brazil", p: 87 },
+      { round: "8es", match: "M91", label: "Spain - France", winner: "France", p: 54 },
+      { round: "8es", match: "M92", label: "Mexico - England", winner: "England", p: 62 },
+      { round: "Quarts", match: "M97", label: "Germany - Brazil", winner: "Brazil", p: 64 },
+      { round: "Quarts", match: "M98", label: "Portugal - Belgium", winner: "Portugal", p: 59 },
+      { round: "Quarts", match: "M99", label: "France - England", winner: "France", p: 52 },
+      { round: "Quarts", match: "M100", label: "Colombia - Argentina", winner: "Argentina", p: 62 },
+      { round: "Demies", match: "M101", label: "Brazil - Portugal", winner: "Brazil", p: 72 },
+      { round: "Demies", match: "M102", label: "France - Argentina", winner: "France", p: 51 },
+      { round: "Finale", match: "M104", label: "Brazil - France", winner: "Brazil", p: 56 }
+    ];
+
+    const config = { responsive: true, displaylogo: false, modeBarButtonsToRemove: ["lasso2d", "select2d"] };
+    const base = {
+      paper_bgcolor: "rgba(0,0,0,0)",
+      plot_bgcolor: "rgba(0,0,0,0)",
+      font: { family: "Inter, Segoe UI, Arial, sans-serif", color: colors.ink },
+      hoverlabel: { bgcolor: "#fff", bordercolor: colors.line, font: { color: colors.ink } }
+    };
+
+    function axis(title = "") {
+      return { title, gridcolor: "#e7edf4", zeroline: false };
+    }
+
+    function setKpis(view) {
+      const kpis = viewMeta[view].kpis;
+      document.getElementById("kpis").innerHTML = kpis.map(([label, value, note, tone, flag]) => `
+        <article class="card kpi ${tone || ""}">
+          <p class="kpi-label">${label}</p>
+          <p class="kpi-value">${flag ? `<img class="flag" src="${flag}" alt="">` : ""}${value}</p>
+          <p class="kpi-note">${note}</p>
+        </article>
+      `).join("");
+    }
+
+    function renderModel(id) {
+      Plotly.react(id, [
+        { type: "bar", name: "Train", x: modelRows.map(d => d.name), y: modelRows.map(d => d.train), marker: { color: "rgba(31,111,209,0.35)" } },
+        { type: "bar", name: "Test", x: modelRows.map(d => d.name), y: modelRows.map(d => d.test), marker: { color: [colors.gray, colors.green, colors.gold] }, text: modelRows.map(d => `${d.test.toFixed(1)} %`), textposition: "outside" }
+      ], {
+        ...base,
+        margin: { l: 48, r: 18, t: 12, b: 46 },
+        barmode: "group",
+        yaxis: { ...axis("Accuracy (%)"), range: [0, 72] },
+        legend: { orientation: "h", y: 1.16, x: 0 }
+      }, config);
+    }
+
+    function renderTitleRace(id) {
+      const data = [...titleRace].reverse();
+      Plotly.react(id, [{
+        type: "bar",
+        orientation: "h",
+        y: data.map(d => d.team),
+        x: data.map(d => d.proba),
+        marker: { color: data.map(d => d.team === "Brazil" ? colors.gold : colors.green) },
+        text: data.map(d => `${d.proba.toFixed(1)} %`),
+        textposition: "outside",
+        hovertemplate: "%{y}<br>Titre : %{x:.1f} %<extra></extra>"
+      }], {
+        ...base,
+        margin: { l: 92, r: 34, t: 10, b: 38 },
+        xaxis: { ...axis("Probabilité (%)"), range: [0, 28] },
+        yaxis: { automargin: true, tickfont: { size: 11 } },
+        showlegend: false
+      }, config);
+    }
+
+    function renderKnockout(id) {
+      Plotly.react(id, [{
+        type: "scatter",
+        mode: "markers+text",
+        x: bracketMatches.map(d => d.round),
+        y: bracketMatches.map(d => `${d.match} ${d.label}`),
+        text: bracketMatches.map(d => d.winner),
+        textposition: "middle right",
+        textfont: { size: 10 },
+        marker: {
+          size: bracketMatches.map(d => 10 + (d.p - 50) * 0.75),
+          color: bracketMatches.map(d => d.winner === "Brazil" ? colors.gold : d.p < 55 ? colors.red : colors.green),
+          opacity: 0.88,
+          line: { color: "#fff", width: 2 }
+        },
+        hovertemplate: "%{y}<br>Vainqueur : %{text}<extra></extra>"
+      }], {
+        ...base,
+        margin: { l: 160, r: 32, t: 8, b: 42 },
+        xaxis: { categoryorder: "array", categoryarray: ["16es", "8es", "Quarts", "Demies", "Finale"], gridcolor: "#e7edf4", zeroline: false },
+        yaxis: { automargin: true, autorange: "reversed", tickfont: { size: 10 } },
+        showlegend: false
+      }, config);
+    }
+
+    function renderFeatures(id) {
+      const data = [...features].reverse();
+      Plotly.react(id, [{
+        type: "bar",
+        orientation: "h",
+        y: data.map(d => d.name),
+        x: data.map(d => d.value),
+        marker: { color: data.map(d => d.name === "Points pondérés" ? colors.gold : colors.green) },
+        text: data.map(d => d.value.toFixed(3)),
+        textposition: "outside"
+      }], {
+        ...base,
+        margin: { l: 118, r: 24, t: 8, b: 34 },
+        xaxis: { ...axis("Importance"), range: [0, 0.24] },
+        yaxis: { automargin: true, tickfont: { size: 11 } },
+        showlegend: false
+      }, config);
+    }
+
+    function renderClasses(id) {
+      Plotly.react(id, [
+        { type: "bar", orientation: "h", name: "Poids", y: classes.map(d => d.name).reverse(), x: classes.map(d => d.share).reverse(), marker: { color: "rgba(31,111,209,0.28)" } },
+        { type: "scatter", mode: "markers+text", name: "Rappel", y: classes.map(d => d.name).reverse(), x: classes.map(d => d.recall).reverse(), marker: { size: 12, color: [colors.green, colors.red, colors.green] }, text: classes.map(d => `${d.recall.toFixed(1)} %`).reverse(), textposition: "middle right" }
+      ], {
+        ...base,
+        margin: { l: 70, r: 18, t: 6, b: 32 },
+        xaxis: { ...axis("%"), range: [0, 95] },
+        yaxis: { automargin: true, tickfont: { size: 11 } },
+        legend: { orientation: "h", y: 1.18, x: 0 }
+      }, config);
+    }
+
+    function renderView(view) {
+      if (!window.Plotly) return;
+      if (view === "overview") {
+        renderKnockout("overview-knockout");
+        renderTitleRace("overview-title-race");
+      }
+      if (view === "model") {
+        renderModel("model-comparison");
+        renderFeatures("feature-impact");
+        renderClasses("class-balance");
+      }
+      if (view === "tournament") renderKnockout("tournament-knockout");
+      if (view === "teams") renderTitleRace("teams-title-race");
+    }
+
+    function setView(view) {
+      const meta = viewMeta[view];
+      document.getElementById("view-title").textContent = meta.title;
+      document.getElementById("view-subtitle").textContent = meta.subtitle;
+      document.getElementById("view-status").textContent = meta.status;
+      document.querySelectorAll("[data-panel]").forEach(panel => panel.classList.toggle("active", panel.dataset.panel === view));
+      document.querySelectorAll("[data-view]").forEach(btn => btn.classList.toggle("active", btn.dataset.view === view));
+      setKpis(view);
+      requestAnimationFrame(() => renderView(view));
+    }
+
+    document.querySelectorAll("[data-view]").forEach(button => {
+      button.addEventListener("click", () => setView(button.dataset.view));
+    });
+
+    setView("overview");
+  </script>
+</body>
+</html>
