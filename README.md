@@ -34,8 +34,8 @@
 - [Évaluation Métrique et Validation](#sec-evaluation)
   - [Chapitre 6 : Travaux Pratiques d’Évaluation &
     Robustesse](#chapitre-6--travaux-pratiques-dévaluation--robustesse)
-- [🧪 Étape 6 : Évaluation Métrique & Robustesse (Squelette
-  Étudiant)](#test_tube-étape-6--évaluation-métrique--robustesse-squelette-étudiant)
+- [🧪 Étape 6 : Évaluation et phase à élimination
+  directe](#test_tube-étape-6--évaluation-et-phase-à-élimination-directe)
 - [Data Storytelling et Communication](#sec-storytelling)
   - [Chapitre 7 : Travaux Pratiques de
     Storytelling](#chapitre-7--travaux-pratiques-de-storytelling)
@@ -752,28 +752,143 @@ et désigner le vainqueur de la Coupe du Monde.
 
 # Évaluation Métrique et Validation
 
+Au-delà de l’*accuracy* — que le cours qualifie de « métrique de vanité
+» — le modèle est évalué avec la batterie d’indicateurs adaptés aux
+classes déséquilibrées : matrice de confusion, précision, rappel,
+F1-score et ROC-AUC. Les hyperparamètres sont ensuite optimisés par
+recherche aléatoire en validation croisée. Le modèle ainsi validé est
+enfin appliqué au **bracket officiel de la phase à élimination directe**
+: la simulation des 16ᵉˢ de finale jusqu’à la finale, complétée par une
+validation Monte-Carlo (20 000 tirages), désigne le **champion du monde
+2026 prédit** et quantifie l’incertitude de la compétition.
+
 ## Chapitre 6 : Travaux Pratiques d’Évaluation & Robustesse
 
-# 🧪 Étape 6 : Évaluation Métrique & Robustesse (Squelette Étudiant)
+# 🧪 Étape 6 : Évaluation et phase à élimination directe
 
-Cette étape correspond au sixième chapitre du cours. L’objectif est de
-mettre en place un protocole d’évaluation rigoureux (splits d’évaluation
-adaptés) et de calculer les métriques clés de performance pour valider
-scientifiquement la qualité de vos modèles.
+Sixième étape du pipeline, alignée sur le **chapitre 6 du cours** («
+Évaluation des Modèles »). Elle poursuit deux objectifs :
+
+1.  **Évaluer rigoureusement** le modèle du notebook 05 — au-delà de la
+    simple *accuracy*, avec les métriques que le cours juge
+    indispensables : matrice de confusion, précision, rappel, F1-score,
+    ROC-AUC (§6.1), puis optimisation des hyperparamètres (§6.2).
+2.  **Simuler la phase à élimination directe** de la Coupe du Monde 2026
+    — appliquer le modèle évalué au bracket officiel (16ᵉˢ de finale →
+    finale) pour répondre à la question finale du projet : **qui sera
+    champion du monde ?**
+
+**Données d’entrée :** `matches_clean.csv` (entraînement) et
+`cdm2026_qualifies.csv` — les 32 équipes qualifiées produites par le
+notebook 05.
 
 ### 1. Préparation de l’environnement
 
-### 2. Évaluation du modèle Tabulaire
+### 2. Reprise du modèle du notebook 05
 
-**À COMPLÉTER PAR L’ÉTUDIANT :** Calculez et interprétez les métriques
-d’erreur sur vos prédictions (MAE, RMSE, R²).
+On reconstruit ici le **meilleur modèle du notebook 05** (XGBoost) : on
+recharge les 30 511 matchs, on réapplique le *feature engineering*
+enrichi (historique de chaque équipe : buts, forme récente, force des
+adversaires → 12 variables différentielles), puis on ré-entraîne XGBoost
+sur le **même split stratifié 80/20** pour garantir la cohérence avec le
+notebook précédent.
 
-### 3. Protocole de Validation Croisée (Out-of-Fold / Chronologique)
+### 3. Évaluation approfondie du modèle (§6.1 du cours)
 
-**À COMPLÉTER PAR L’ÉTUDIANT :** Décrivez et codez (ou documentez) une
-stratégie de validation croisée adaptée au comportement temporel de vos
-données pour valider la robustesse de votre modèle sans fuite
-d’information.
+> *« En 2026, l’industrie a enfin compris que l’Accuracy est souvent une
+> métrique de vanité. »* — chapitre 6 du cours.
+
+L’accuracy seule ne suffit pas, surtout sur des **classes
+déséquilibrées** (ici `home_win` 48 %, `away_win` 28 %, `draw` 23 %). On
+mobilise donc la batterie de métriques du cours :
+
+- **Matrice de confusion** — le « bilan sanguin » du modèle : où se
+  trompe-t-il ?
+- **Précision** (sur mes alertes, combien sont vraies ?) et **Rappel**
+  (sur les cas réels, combien j’en capture ?), par classe.
+- **F1-score** — moyenne harmonique précision/rappel, indispensable en
+  classes déséquilibrées.
+- **ROC-AUC** — capacité du modèle à séparer les classes (1.0 = parfait,
+  0.5 = hasard).
+
+### 4. Optimisation des hyperparamètres (§6.2 du cours)
+
+Les hyperparamètres (`n_estimators`, `max_depth`, `learning_rate`…) ne
+sont pas appris par le modèle : on les règle nous-mêmes. Le cours
+présente trois approches : **Grid Search**, **Random Search**, et
+l’**optimisation bayésienne** (Optuna, devenu le standard 2026).
+
+On applique ici un **Random Search** via `RandomizedSearchCV` de
+scikit-learn : il échantillonne des combinaisons au hasard et les évalue
+en **validation croisée 3 plis**. Plus rapide qu’un Grid Search
+exhaustif, sans dépendance supplémentaire.
+
+> 💡 *Le cours recommande Optuna (algorithme TPE) pour les projets de
+> production : il « apprend » de ses essais précédents au lieu de
+> chercher à l’aveugle. Random Search reste suffisant pour notre volume
+> de données.*
+
+### 5. Phase à élimination directe — qui sera champion du monde ?
+
+On applique maintenant le modèle au **bracket officiel de la CDM 2026**
+(source : Wikipédia, *2026 FIFA World Cup knockout stage*), encodé dans
+`src/wc2026.py` : 16ᵉˢ de finale (32 équipes) → 8ᵉˢ → quarts → demies →
+**finale**.
+
+**Trois principes de simulation :**
+
+1.  **Neutralisation de l’avantage du terrain.** En phase finale, les
+    matchs sont sur terrain neutre. Comme le modèle a appris un fort
+    avantage à domicile, on prédit chaque match **dans les deux sens**
+    (A reçoit B, puis B reçoit A) et on **moyenne** les probabilités.
+    L’asymétrie domicile/extérieur s’annule.
+2.  **Pas de match nul possible.** Un match à élimination directe a
+    forcément un vainqueur : la probabilité de nul est redistribuée, et
+    l’équipe la plus probable se qualifie (le nul correspondrait à une
+    qualification aux tirs au but, qui favorise statistiquement le
+    favori).
+3.  **Affectation des 8 troisièmes.** La FIFA place les 8 meilleurs 3ᵉˢ
+    via une table de combinaisons. On calcule une **affectation valide**
+    respectant les contraintes d’éligibilité de chaque match des 16ᵉˢ.
+
+#### 5.1 Simulation déterministe du bracket
+
+À chaque tour, on fait avancer l’équipe la **plus probable**. On déroule
+ainsi les 16ᵉˢ jusqu’à la finale.
+
+#### Le parcours du champion
+
+#### 5.2 Robustesse — probabilités de titre par Monte-Carlo
+
+La simulation déterministe désigne un seul champion, mais elle ignore
+les **surprises** (un favori à 60 % perd tout de même 4 fois sur 10).
+Pour mesurer la **robustesse** de la prédiction, on rejoue le tournoi
+**un grand nombre de fois** : à chaque match, le vainqueur est tiré au
+hasard selon sa probabilité. La fréquence de victoire finale de chaque
+équipe donne sa **probabilité de titre**.
+
+### 6. Synthèse — évaluation et prédiction finale
+
+1.  **Au-delà de l’accuracy** (§6.1 du cours) : la matrice de confusion
+    et le F1-score confirment un modèle solide sur `home_win` /
+    `away_win` mais quasi aveugle sur les matchs nuls (`draw`) — limite
+    intrinsèque, le nul étant peu prévisible.
+2.  **Optimisation des hyperparamètres** (§6.2) : le Random Search en
+    validation croisée 3 plis n’apporte qu’un gain marginal — le modèle
+    de base XGBoost était déjà bien réglé.
+3.  **Phase à élimination directe** : en appliquant le modèle au bracket
+    officiel (avantage du terrain neutralisé), on simule l’intégralité
+    du tournoi des 16ᵉˢ de finale jusqu’à la finale.
+4.  **Prédiction finale** : le modèle désigne un **champion du monde
+    2026** ; la validation **Monte-Carlo** (20 000 simulations) confirme
+    qu’il s’agit du favori le plus probable, tout en quantifiant
+    l’incertitude réelle de la compétition.
+5.  **Limites** : pas de gestion des blessures, suspensions ni dynamique
+    de tournoi ; le modèle reste une estimation probabiliste — le
+    football garde sa part d’imprévu.
+
+➡️ Le notebook `07_communication` restituera ces résultats sous forme de
+*data storytelling* à destination d’un public non technique.
 
 ------------------------------------------------------------------------
 

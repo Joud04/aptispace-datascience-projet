@@ -123,6 +123,15 @@ graph TD
 
 # Évaluation Métrique et Validation {#sec-evaluation}
 
+Au-delà de l'*accuracy* — que le cours qualifie de « métrique de vanité » — le
+modèle est évalué avec la batterie d'indicateurs adaptés aux classes
+déséquilibrées : matrice de confusion, précision, rappel, F1-score et ROC-AUC.
+Les hyperparamètres sont ensuite optimisés par recherche aléatoire en validation
+croisée. Le modèle ainsi validé est enfin appliqué au **bracket officiel de la
+phase à élimination directe** : la simulation des 16ᵉˢ de finale jusqu'à la
+finale, complétée par une validation Monte-Carlo (20 000 tirages), désigne le
+**champion du monde 2026 prédit** et quantifie l'incertitude de la compétition.
+
 ## Chapitre 6 : Travaux Pratiques d'Évaluation & Robustesse
 {{< include ../build/notebooks/06_evaluation.qmd >}}
 
