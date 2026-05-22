@@ -976,8 +976,9 @@ projet en **sept vues** accessibles depuis une barre latérale :
   variables et d’hyperparamètres ;
 - **Phase de groupes** — les 12 groupes officiels (tirage du 5
   décembre 2025) avec drapeaux et classement projeté de chaque équipe ;
-- **Phase finale** — bracket interactif des 16ᵉˢ à la finale, filtrable
-  par tour, avec suivi du parcours d’une équipe, et podium projeté ;
+- **Phase finale** — bracket complet « route vers la finale » des 16ᵉˢ
+  jusqu’au champion, avec drapeaux et suivi interactif du parcours d’une
+  équipe ;
 - **Équipes** — probabilités de titre et meilleurs vainqueurs de groupe
   (xPts) ;
 - **Décision** — trois messages clés et récapitulatif des indicateurs.
@@ -1092,7 +1093,7 @@ navigateur, sans installation. Il synthétise l’ensemble du pipeline en
 | **Jeu de données** | Volume de matchs, buts par décennie, répartition des résultats, poids de l’écart de classement FIFA. |
 | **Modèle** | Comparaison Baseline / Random Forest / XGBoost, variables influentes, classes mal détectées, et explication des choix de variables et d’hyperparamètres. |
 | **Phase de groupes** | Les 12 groupes officiels avec drapeaux et classement projeté de chaque équipe (points espérés). |
-| **Phase finale** | Bracket interactif des 16ᵉˢ à la finale, filtrable par tour, suivi du parcours d’une équipe, et podium projeté. |
+| **Phase finale** | Bracket complet « route vers la finale » : les 32 équipes des 16ᵉˢ jusqu’au champion, avec drapeaux et suivi interactif du parcours d’une équipe. |
 | **Équipes** | Probabilités de titre et meilleurs vainqueurs de groupe (xPts). |
 | **Décision** | Trois messages clés et récapitulatif des indicateurs. |
 

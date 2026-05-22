@@ -342,7 +342,7 @@
     }
 
     .view-tournament {
-      grid-template-columns: minmax(0, 1.55fr) minmax(290px, 0.7fr);
+      grid-template-columns: minmax(0, 1fr);
       grid-template-rows: minmax(0, 1fr);
     }
 
@@ -811,6 +811,46 @@
       line-height: 1;
     }
 
+    /* ---------- Bracket « Route vers la finale » ---------- */
+    .panel.dark {
+      background: linear-gradient(165deg, #0d1830, #070d18);
+      border-color: #1d2c42;
+    }
+    .panel.dark .panel-head h2 { color: #f3f6fa; }
+    .panel.dark .panel-head .note { color: #8093a9; }
+
+    .bracket-stage { width: 100%; height: 100%; min-height: 0; }
+    .bracket-stage svg { width: 100%; height: 100%; display: block; }
+
+    .bt-link { fill: none; stroke: #2c4459; stroke-width: 2; }
+    .bt-link.hot { stroke: var(--gold); stroke-width: 3; }
+
+    .bt-node { cursor: pointer; }
+    .bt-node circle.ring {
+      fill: #eef2f7;
+      stroke: #3c5872;
+      stroke-width: 2.4;
+      transition: stroke .15s ease, stroke-width .15s ease;
+    }
+    .bt-node.bt-win circle.ring { stroke: #1fc99b; }
+    .bt-node.bt-focus circle.ring { stroke: var(--gold); stroke-width: 4; }
+    .bt-node:hover circle.ring { stroke: var(--gold); }
+
+    .bt-hd {
+      fill: #6c8099;
+      font-size: 13px; font-weight: 800;
+      letter-spacing: .1em; text-anchor: middle;
+    }
+    .bt-hd.fin { fill: var(--gold); }
+
+    .bt-champ-ring { fill: #eef2f7; stroke: var(--gold); stroke-width: 4.5; }
+    .bt-trophy { font-size: 30px; text-anchor: middle; }
+    .bt-champ-lbl {
+      fill: var(--gold); font-size: 12px; font-weight: 900;
+      letter-spacing: .18em; text-anchor: middle;
+    }
+    .bt-champ-name { fill: #f3f6fa; font-size: 15px; font-weight: 900; text-anchor: middle; }
+
     /* ---------- Explications ---------- */
     .explain { padding: 12px 16px 16px; display: grid; gap: 11px; align-content: start; }
 
@@ -1099,46 +1139,13 @@
 
         <!-- PHASE FINALE -->
         <div class="view view-tournament" data-panel="tournament">
-          <section class="panel">
+          <section class="panel dark">
             <div class="panel-head">
-              <div><h2>Bracket interactif — 16ᵉˢ de finale à la finale</h2><p class="note">Filtrez par tour ; cliquez une équipe pour suivre son parcours. Bordure rouge = match serré (&lt; 55 %).</p></div>
-            </div>
-            <div class="panel-body scroll">
-              <div class="toolbar" aria-label="Filtrer par tour">
-                <button class="active" type="button" data-round="16es de finale">16ᵉˢ</button>
-                <button type="button" data-round="8es de finale">8ᵉˢ</button>
-                <button type="button" data-round="Quarts de finale">Quarts</button>
-                <button type="button" data-round="Demi-finales">Demies</button>
-                <button type="button" data-round="Finale">Finale</button>
-                <span id="track-chip" class="track-chip">Parcours&nbsp;: <b id="track-name"></b><button type="button" id="track-clear" aria-label="Retirer le filtre">✕</button></span>
-              </div>
-              <div id="tn-bracket" class="bracket-grid"></div>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-head">
-              <div><h2>Podium projeté</h2><p class="note">Scénario central du bracket.</p></div>
+              <div><h2>La route vers la finale — CDM 2026</h2><p class="note">Phase à élimination directe simulée, des 16ᵉˢ à la finale. Le parcours du champion est surligné en or — cliquez une équipe pour suivre le sien.</p></div>
+              <span id="track-chip" class="track-chip">Parcours&nbsp;: <b id="track-name"></b><button type="button" id="track-clear" aria-label="Revenir au champion">✕</button></span>
             </div>
             <div class="panel-body">
-              <div class="podium">
-                <div class="pod-card p2">
-                  <div class="pod-team"><img class="flag" src="https://flagcdn.com/w40/fr.png" alt="">France</div>
-                  <div class="pod-step">2</div><div class="pod-meta">Finaliste</div>
-                </div>
-                <div class="pod-card p1">
-                  <div class="pod-team"><img class="flag" src="https://flagcdn.com/w40/br.png" alt="">Brésil</div>
-                  <div class="pod-step">1</div><div class="pod-meta">Champion</div>
-                </div>
-                <div class="pod-card p3">
-                  <div class="pod-team"><img class="flag" src="https://flagcdn.com/w40/ar.png" alt="">Argentine</div>
-                  <div class="pod-step">3</div><div class="pod-meta">3ᵉ place</div>
-                </div>
-              </div>
-              <div class="podium-note">
-                Le terrain est <b>neutralisé</b> : chaque match est prédit deux fois (sens inversé)
-                et moyenné, pour ne pas avantager artificiellement l'équipe « à domicile ».
-                Finale : <b>Brésil 56 %</b> face à la France.
-              </div>
+              <div id="tn-bracket" class="bracket-stage"></div>
             </div>
           </section>
         </div>
@@ -1519,23 +1526,8 @@
       }), config);
     }
 
-    /* ---- Bracket interactif (sans Plotly) ---- */
+    /* ---- Bracket « Route vers la finale » (SVG, sans Plotly) ---- */
     let trackedTeam = null;
-    let currentRound = "16es de finale";
-    const roundShort = {
-      "16es de finale": "16ᵉˢ de finale", "8es de finale": "8ᵉˢ de finale",
-      "Quarts de finale": "Quart de finale", "Demi-finales": "Demi-finale", "Finale": "Finale"
-    };
-
-    function bracketRow(team, pct, isWin, isGold) {
-      const cls = "mc-row" + (isWin ? " win" : "") + (isWin && isGold ? " gold" : "") +
-                  (trackedTeam === team ? " tracked" : "");
-      const fl = flagUrl(team);
-      const img = fl ? '<img class="flag" src="' + fl + '" alt="">' : "";
-      return '<div class="' + cls + '" data-team="' + team + '">' + img +
-             '<span class="nm">' + fr(team) + '</span>' +
-             '<span class="pct">' + pct + ' %</span></div>';
-    }
 
     function updateTrackChip() {
       const chip = document.getElementById("track-chip");
@@ -1547,30 +1539,147 @@
       }
     }
 
-    function renderBracket() {
-      const rows = bracketMatches.filter(function (d) { return d.round === currentRound; });
-      const html = rows.map(function (d) {
-        const aWin = d.winner === d.a;
-        const pa = aWin ? d.p : 100 - d.p;
-        const pb = 100 - pa;
-        const tight = d.p < 55;
-        const gold = d.winner === "Brazil";
-        const onPath = trackedTeam && (d.a === trackedTeam || d.b === trackedTeam);
-        return '<article class="match-card' + (tight ? " tight" : "") + (onPath ? " on-path" : "") + '">' +
-               '<div class="mc-id">' + d.match + ' · ' + roundShort[d.round] + '</div>' +
-               bracketRow(d.a, pa, aWin, gold) +
-               bracketRow(d.b, pb, !aWin, gold) +
-               '<div class="mc-bar"><i style="width:' + Math.max(pa, pb) + '%"></i></div>' +
-               '</article>';
-      }).join("");
-      const grid = document.getElementById("tn-bracket");
-      grid.innerHTML = html;
-      grid.querySelectorAll(".mc-row").forEach(function (r) {
-        r.addEventListener("click", function () {
-          const t = r.dataset.team;
-          trackedTeam = (trackedTeam === t) ? null : t;
+    function renderBracketTree() {
+      const m = {};
+      bracketMatches.forEach(function (x) { m[x.match] = x; });
+      const champion = m["M104"].winner;
+      const focus = trackedTeam || champion;
+
+      const W = 1200, H = 680;
+      const x0 = 54, xN = W - 54;
+      const xAt = function (k) { return x0 + k * (xN - x0) / 9; };
+      const yTop = 78, yBot = H - 68;
+      const rByCol = [14, 16, 18, 20, 23];
+      const roundLbl = ["16ᵉˢ de finale", "8ᵉˢ de finale", "Quart de finale", "Demi-finale", "Finale"];
+
+      function buildHalf(r32, r16, qf, sf, colX) {
+        const cols = [[]];
+        r32.forEach(function (id) {
+          cols[0].push({ team: m[id].a, mid: id });
+          cols[0].push({ team: m[id].b, mid: id });
+        });
+        const seq = [r32, r16, qf, [sf]];
+        for (var c = 0; c < 4; c++) {
+          cols.push(seq[c].map(function (id, i) {
+            var nx;
+            if (c === 0) nx = r16[Math.floor(i / 2)];
+            else if (c === 1) nx = qf[Math.floor(i / 2)];
+            else if (c === 2) nx = sf;
+            else nx = "M104";
+            return { team: m[id].winner, mid: nx };
+          }));
+        }
+        for (var a = 0; a < cols[0].length; a++) {
+          cols[0][a].y = yTop + (a + 0.5) * (yBot - yTop) / cols[0].length;
+        }
+        for (var c2 = 1; c2 < 5; c2++) {
+          for (var b = 0; b < cols[c2].length; b++) {
+            cols[c2][b].y = (cols[c2 - 1][2 * b].y + cols[c2 - 1][2 * b + 1].y) / 2;
+          }
+        }
+        for (var c3 = 0; c3 < 5; c3++) {
+          cols[c3].forEach(function (n) {
+            n.x = colX[c3]; n.r = rByCol[c3]; n.col = c3;
+            n.win = m[n.mid].winner === n.team;
+          });
+        }
+        return cols;
+      }
+
+      const L = buildHalf(["M73", "M75", "M74", "M77", "M83", "M84", "M81", "M82"],
+        ["M89", "M90", "M93", "M94"], ["M97", "M98"], "M101",
+        [xAt(0), xAt(1), xAt(2), xAt(3), xAt(4)]);
+      const R = buildHalf(["M76", "M78", "M79", "M80", "M86", "M88", "M85", "M87"],
+        ["M91", "M92", "M95", "M96"], ["M99", "M100"], "M102",
+        [xAt(9), xAt(8), xAt(7), xAt(6), xAt(5)]);
+
+      let defs = "", links = "", nodes = "", idx = 0;
+
+      function drawNode(n) {
+        const id = "btc" + (idx++);
+        const fl = flagUrl(n.team);
+        const ri = n.r - 2.5;
+        const cls = "bt-node" + (n.win ? " bt-win" : "") + (n.team === focus ? " bt-focus" : "");
+        const p = m[n.mid].p;
+        const pct = n.win ? p : 100 - p;
+        const status = n.col === 4 ? (n.win ? "Champion" : "Finaliste") : (n.win ? "Qualifié" : "Éliminé");
+        const tip = fr(n.team) + " · " + roundLbl[n.col] + " · " + status + " (" + pct + " %)";
+        let img = "";
+        if (fl) {
+          defs += '<clipPath id="' + id + '"><circle cx="' + n.x + '" cy="' + n.y + '" r="' + ri + '"/></clipPath>';
+          img = '<image href="' + fl + '" x="' + (n.x - ri) + '" y="' + (n.y - ri) + '" width="' + (2 * ri) +
+                '" height="' + (2 * ri) + '" clip-path="url(#' + id + ')" preserveAspectRatio="xMidYMid slice"/>';
+        }
+        nodes += '<g class="' + cls + '" data-team="' + n.team + '"><title>' + tip + '</title>' +
+                 '<circle class="ring" cx="' + n.x + '" cy="' + n.y + '" r="' + n.r + '"/>' + img + '</g>';
+      }
+
+      function drawLinks(cols, dir) {
+        for (var c = 0; c < 4; c++) {
+          for (var i = 0; i < cols[c + 1].length; i++) {
+            const f1 = cols[c][2 * i], f2 = cols[c][2 * i + 1], w = cols[c + 1][i];
+            const elbow = f1.x + (w.x - f1.x) * 0.5;
+            const hot = (f1.team === focus || f2.team === focus);
+            const d = "M" + (f1.x + dir * f1.r) + " " + f1.y + " H" + elbow +
+                      " M" + (f2.x + dir * f2.r) + " " + f2.y + " H" + elbow +
+                      " M" + elbow + " " + f1.y + " V" + f2.y +
+                      " M" + elbow + " " + w.y + " H" + (w.x - dir * w.r);
+            links += '<path class="bt-link' + (hot ? " hot" : "") + '" d="' + d + '"/>';
+          }
+        }
+      }
+
+      drawLinks(L, 1);
+      drawLinks(R, -1);
+
+      const lf = L[4][0], rf = R[4][0];
+      const cx = W / 2, cy = (lf.y + rf.y) / 2;
+      const champY = cy + 140;
+      const finalHot = (m["M104"].a === focus || m["M104"].b === focus);
+      links += '<path class="bt-link' + (finalHot ? " hot" : "") + '" d="' +
+               "M" + (lf.x + lf.r) + " " + lf.y + " H" + cx +
+               " M" + (rf.x - rf.r) + " " + rf.y + " H" + cx +
+               " M" + cx + " " + Math.min(lf.y, rf.y) + " V" + (champY - 30) + '"/>';
+
+      [L, R].forEach(function (half) {
+        for (var c = 0; c < 5; c++) half[c].forEach(drawNode);
+      });
+
+      const champFl = flagUrl(champion);
+      let champImg = "";
+      if (champFl) {
+        const cid = "btc" + (idx++);
+        defs += '<clipPath id="' + cid + '"><circle cx="' + cx + '" cy="' + champY + '" r="26"/></clipPath>';
+        champImg = '<image href="' + champFl + '" x="' + (cx - 26) + '" y="' + (champY - 26) +
+                   '" width="52" height="52" clip-path="url(#' + cid + ')" preserveAspectRatio="xMidYMid slice"/>';
+      }
+      const champNode =
+        '<text class="bt-trophy" x="' + cx + '" y="' + (champY - 42) + '">🏆</text>' +
+        '<g class="bt-node" data-team="' + champion + '"><title>' + fr(champion) + ' · Champion du monde 2026</title>' +
+        '<circle class="bt-champ-ring" cx="' + cx + '" cy="' + champY + '" r="29"/>' + champImg + '</g>' +
+        '<text class="bt-champ-lbl" x="' + cx + '" y="' + (champY + 52) + '">CHAMPION</text>' +
+        '<text class="bt-champ-name" x="' + cx + '" y="' + (champY + 71) + '">' + fr(champion) + '</text>';
+
+      const hdNames = ["16ᵉˢ", "8ᵉˢ", "Quarts", "Demies"];
+      let headers = "";
+      for (var k = 0; k < 4; k++) {
+        headers += '<text class="bt-hd" x="' + xAt(k) + '" y="42">' + hdNames[k] + '</text>';
+        headers += '<text class="bt-hd" x="' + xAt(9 - k) + '" y="42">' + hdNames[k] + '</text>';
+      }
+      headers += '<text class="bt-hd fin" x="' + cx + '" y="42">FINALE</text>';
+
+      const svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" ' +
+                  'role="img" aria-label="Bracket de la phase finale de la CDM 2026">' +
+                  '<defs>' + defs + '</defs>' + headers + links + nodes + champNode + '</svg>';
+
+      const stage = document.getElementById("tn-bracket");
+      stage.innerHTML = svg;
+      stage.querySelectorAll(".bt-node").forEach(function (g) {
+        g.addEventListener("click", function () {
+          const t = g.dataset.team;
+          trackedTeam = (t === champion || trackedTeam === t) ? null : t;
           updateTrackChip();
-          renderBracket();
+          renderBracketTree();
         });
       });
     }
@@ -1801,7 +1910,7 @@
 
     function renderView(view) {
       if (view === "groups") { renderGroups(); return; }
-      if (view === "tournament") { renderBracket(); return; }
+      if (view === "tournament") { renderBracketTree(); return; }
       if (!window.Plotly) {
         document.getElementById("plotly-warning").style.display = "block";
         return;
@@ -1857,20 +1966,11 @@
       button.addEventListener("click", function () { setView(button.dataset.view); });
     });
 
-    /* ---- Filtres de tour (bracket) ---- */
-    document.querySelectorAll("[data-round]").forEach(function (button) {
-      button.addEventListener("click", function () {
-        document.querySelectorAll("[data-round]").forEach(function (b) { b.classList.remove("active"); });
-        button.classList.add("active");
-        currentRound = button.dataset.round;
-        renderBracket();
-      });
-    });
-
+    /* ---- Bracket : retour au parcours du champion ---- */
     document.getElementById("track-clear").addEventListener("click", function () {
       trackedTeam = null;
       updateTrackChip();
-      renderBracket();
+      renderBracketTree();
     });
 
     /* ---- Filtres de la phase de groupes ---- */
