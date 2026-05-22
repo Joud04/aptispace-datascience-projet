@@ -33,7 +33,8 @@ Thumbs.db
 
 *.pdf
 *.html
-# Exception : le tableau de bord est un livrable du projet (pas un artefact de build)
+# Exception : les tableaux de bord sont des livrables du projet (pas des artefacts de build)
 !dashboard.html
+!dashboard_operational.html
 /.quarto/
 **/*.quarto_ipynb
