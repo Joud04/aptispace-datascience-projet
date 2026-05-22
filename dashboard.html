@@ -1,0 +1,1531 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aptispace Football Forecast — Dashboard CDM 2026</title>
+  <meta name="description" content="Tableau de bord Data Science : prédiction du vainqueur de la Coupe du Monde 2026.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root {
+      --page: #e6ebf1;
+      --ink: #0b1726;
+      --muted: #5d6b7e;
+      --faint: #8a98aa;
+      --line: #dde5ee;
+      --panel: #ffffff;
+      --sidebar: #0c1626;
+      --sidebar-2: #070e1a;
+      --pitch: #0a7d52;
+      --pitch-2: #0a6244;
+      --pitch-soft: #ecf6f1;
+      --gold: #dca424;
+      --gold-2: #b9831a;
+      --blue: #2f6fd7;
+      --red: #cf4f59;
+      --shadow-sm: 0 5px 16px rgba(11, 23, 38, 0.07);
+      --shadow: 0 22px 50px rgba(11, 23, 38, 0.20);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { height: 100%; }
+
+    body {
+      margin: 0;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(1100px 540px at 18% -8%, rgba(255,255,255,0.7), transparent 60%),
+        var(--page);
+      color: var(--ink);
+      font-family: "Inter", "Segoe UI", Arial, Helvetica, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden;
+    }
+
+    /* ---------- App shell ---------- */
+    .app {
+      width: min(1480px, calc(100vw - 30px));
+      height: min(916px, calc(100vh - 30px));
+      display: grid;
+      grid-template-columns: 232px minmax(0, 1fr);
+      background: #f4f7fa;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    /* ---------- Sidebar ---------- */
+    aside {
+      background: linear-gradient(185deg, var(--sidebar), var(--sidebar-2));
+      color: #fff;
+      padding: 22px 16px;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding-bottom: 20px;
+      margin-bottom: 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+    }
+
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      background: linear-gradient(150deg, var(--pitch), var(--pitch-2));
+      font-size: 20px;
+      box-shadow: 0 8px 18px rgba(10, 125, 82, 0.4);
+    }
+
+    .brand-title { margin: 0; font-size: 14px; font-weight: 900; letter-spacing: .03em; }
+    .brand-sub { margin: 2px 0 0; font-size: 11px; font-weight: 600; color: #9fb2c8; }
+
+    .nav-label {
+      margin: 4px 0 8px 8px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: #687c93;
+    }
+
+    .nav { display: grid; gap: 5px; }
+
+    .nav button {
+      width: 100%;
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 11px;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      background: transparent;
+      color: #c2d0e1;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 800;
+      text-align: left;
+      cursor: pointer;
+      transition: background .18s ease, color .18s ease;
+    }
+
+    .nav button:hover { background: rgba(255, 255, 255, 0.07); color: #fff; }
+
+    .nav button.active {
+      background: linear-gradient(100deg, rgba(10,125,82,0.95), rgba(10,98,68,0.95));
+      color: #fff;
+      box-shadow: 0 8px 20px rgba(10, 125, 82, 0.35);
+    }
+
+    .nav .ico {
+      width: 26px;
+      height: 26px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      font-size: 13px;
+    }
+
+    .nav button.active .ico { background: rgba(255, 255, 255, 0.18); }
+
+    .side-foot {
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.10);
+    }
+
+    .fav-card {
+      padding: 13px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+    }
+
+    .fav-card .lbl {
+      font-size: 9.5px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #8fa4bc;
+    }
+
+    .fav-card .row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-top: 8px;
+    }
+
+    .fav-card .row strong { font-size: 15px; font-weight: 900; }
+    .fav-card .row .pct {
+      margin-left: auto;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(220, 164, 36, 0.22);
+      color: #ffd873;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .side-meta {
+      margin: 13px 0 0;
+      font-size: 10.5px;
+      line-height: 1.6;
+      color: #71839a;
+    }
+
+    /* ---------- Main ---------- */
+    main {
+      min-width: 0;
+      min-height: 0;
+      padding: 18px;
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      gap: 14px;
+      overflow: hidden;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .topbar h1 {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.1;
+      font-weight: 900;
+      letter-spacing: -0.01em;
+    }
+
+    .topbar .sub {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 12.5px;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 9px 13px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-sm);
+      font-size: 11.5px;
+      font-weight: 800;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .status .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--pitch);
+      box-shadow: 0 0 0 4px rgba(10, 125, 82, 0.16);
+    }
+
+    /* ---------- KPIs ---------- */
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .kpi {
+      position: relative;
+      padding: 14px 15px;
+      border-radius: 13px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .kpi:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(11,23,38,0.12); }
+
+    .kpi::before {
+      content: "";
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 4px;
+      background: var(--blue);
+    }
+
+    .kpi.gold::before { background: var(--gold); }
+    .kpi.green::before { background: var(--pitch); }
+    .kpi.red::before { background: var(--red); }
+
+    .kpi .lbl {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+
+    .kpi .val {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+      font-size: 24px;
+      line-height: 1;
+      font-weight: 900;
+    }
+
+    .kpi .desc {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    /* ---------- Views ---------- */
+    .views { min-height: 0; overflow: hidden; }
+
+    .view {
+      display: none;
+      height: 100%;
+      min-height: 0;
+      gap: 14px;
+      animation: fade .35s ease;
+    }
+
+    .view.active { display: grid; }
+
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .view-overview {
+      grid-template-columns: minmax(0, 1.5fr) minmax(300px, 0.85fr);
+      grid-template-rows: minmax(0, 1.25fr) minmax(0, 1fr);
+    }
+
+    .view-model {
+      grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+      grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .view-data {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .view-tournament {
+      grid-template-columns: minmax(0, 1.55fr) minmax(290px, 0.7fr);
+      grid-template-rows: minmax(0, 1fr);
+    }
+
+    .view-teams {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-rows: minmax(0, 1fr);
+    }
+
+    .view-decision {
+      grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+      grid-template-rows: minmax(0, 1fr);
+    }
+
+    .span-row { grid-row: span 2; }
+
+    /* ---------- Panels ---------- */
+    .panel {
+      min-width: 0;
+      min-height: 0;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: var(--shadow-sm);
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      padding: 14px 16px 6px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .panel-head h2 {
+      margin: 0;
+      font-size: 14.5px;
+      line-height: 1.15;
+      font-weight: 900;
+    }
+
+    .panel-head .note {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .badge {
+      flex: 0 0 auto;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: var(--pitch-soft);
+      color: var(--pitch-2);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .03em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .badge.gold { background: #fbf1d6; color: var(--gold-2); }
+
+    .chart {
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+    }
+
+    .panel-body {
+      min-height: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-body.scroll { overflow-y: auto; }
+
+    /* ---------- Toolbar ---------- */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 4px 16px 10px;
+    }
+
+    .toolbar button {
+      appearance: none;
+      padding: 6px 11px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--muted);
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all .16s ease;
+    }
+
+    .toolbar button:hover { border-color: var(--pitch); color: var(--pitch-2); }
+    .toolbar button.active { border-color: var(--pitch); background: var(--pitch); color: #fff; }
+
+    /* ---------- Champion ring ---------- */
+    .champion {
+      padding: 12px 16px 16px;
+      display: grid;
+      place-content: center;
+      text-align: center;
+    }
+
+    .ring {
+      width: 138px;
+      height: 138px;
+      margin: 0 auto 12px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at center, #fff 0 55%, transparent 56%),
+        conic-gradient(var(--gold) 0 84.2deg, #e9eef4 84.2deg 360deg);
+    }
+
+    .ring .inner { text-align: center; }
+    .ring .inner b { display: block; font-size: 30px; font-weight: 900; line-height: 1; }
+    .ring .inner small { display: block; margin-top: 3px; font-size: 9.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+
+    .champion h3 {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .champion p {
+      margin: 7px auto 0;
+      max-width: 260px;
+      color: var(--muted);
+      font-size: 11.5px;
+      line-height: 1.45;
+    }
+
+    .champion .final-line {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--muted);
+    }
+
+    .vs-pill {
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #f1f4f8;
+      font-size: 10px;
+      font-weight: 900;
+      color: var(--faint);
+    }
+
+    /* ---------- Podium ---------- */
+    .podium {
+      padding: 14px 16px 18px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 11px;
+      align-items: end;
+    }
+
+    .pod-card { text-align: center; }
+
+    .pod-team {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 9px;
+      font-size: 12.5px;
+      font-weight: 900;
+    }
+
+    .pod-step {
+      border-radius: 11px 11px 4px 4px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 26px;
+      font-weight: 900;
+      box-shadow: inset 0 -18px 28px rgba(0, 0, 0, 0.16);
+    }
+
+    .pod-meta { margin-top: 8px; color: var(--muted); font-size: 10px; font-weight: 800; }
+
+    .p2 .pod-step { height: 86px; background: linear-gradient(180deg, #c2cbd7, #8b97a8); }
+    .p1 .pod-step { height: 124px; background: linear-gradient(180deg, #f4cf68, #c8911c); color: #2a1f06; }
+    .p3 .pod-step { height: 64px; background: linear-gradient(180deg, #dc9560, #ab5f37); }
+
+    .podium-note {
+      margin: 0 16px 16px;
+      padding: 12px 13px;
+      border-radius: 11px;
+      background: #f8fbfd;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 11.5px;
+      line-height: 1.5;
+    }
+
+    .podium-note b { color: var(--ink); }
+
+    /* ---------- Insights ---------- */
+    .insights {
+      padding: 14px 16px;
+      display: grid;
+      align-content: center;
+      gap: 11px;
+    }
+
+    .insight {
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      gap: 13px;
+      align-items: start;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #f8fbfd;
+      transition: border-color .18s ease, transform .18s ease;
+    }
+
+    .insight:hover { border-color: var(--pitch); transform: translateX(3px); }
+
+    .insight .num {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: var(--sidebar);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .insight strong { display: block; margin-bottom: 3px; font-size: 13px; font-weight: 900; }
+    .insight span { color: var(--muted); font-size: 12px; line-height: 1.5; }
+
+    /* ---------- Table ---------- */
+    .table-wrap { overflow-y: auto; min-height: 0; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      background: #f7f9fb;
+      padding: 11px 14px;
+      text-align: left;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--line);
+    }
+
+    tbody td {
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: middle;
+    }
+
+    tbody tr { transition: background .14s ease; }
+    tbody tr:hover { background: #f8fbfd; }
+    tbody tr:last-child td { border-bottom: 0; }
+
+    td:first-child { font-weight: 900; }
+
+    .cell-flag { display: inline-flex; align-items: center; gap: 7px; }
+
+    .pill {
+      display: inline-flex;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: var(--pitch-soft);
+      color: var(--pitch-2);
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .pill.warn { background: #fbf1d6; color: var(--gold-2); }
+    .pill.risk { background: #fbe4e6; color: #a83943; }
+
+    /* ---------- Flags ---------- */
+    .flag {
+      width: 22px;
+      height: 15px;
+      flex: 0 0 auto;
+      border-radius: 3px;
+      object-fit: cover;
+      box-shadow: 0 0 0 1px rgba(11, 23, 38, 0.12);
+    }
+
+    .flag.lg { width: 27px; height: 19px; }
+
+    /* ---------- Warning ---------- */
+    .warning {
+      display: none;
+      grid-column: 1 / -1;
+      align-self: start;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid #f1c66d;
+      background: #fff8e5;
+      color: #6b4c00;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 1180px), (max-height: 660px) {
+      body { display: block; overflow: auto; place-items: stretch; }
+      .app {
+        width: 100%;
+        height: auto;
+        min-height: 100vh;
+        border-radius: 0;
+        border: 0;
+        grid-template-columns: 1fr;
+      }
+      aside {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px 14px;
+        padding: 14px 16px;
+      }
+      .brand { padding: 0; margin: 0; border: 0; }
+      .nav-label { display: none; }
+      .nav {
+        grid-auto-flow: column;
+        grid-auto-columns: max-content;
+        overflow-x: auto;
+        margin-left: auto;
+      }
+      .nav button { padding: 8px 11px; }
+      .nav .ico { display: none; }
+      .side-foot { display: none; }
+      main { overflow: visible; height: auto; }
+      .views { overflow: visible; }
+      .view, .view.active {
+        display: grid;
+        height: auto;
+        grid-template-columns: 1fr !important;
+        grid-template-rows: none !important;
+        animation: none;
+      }
+      .span-row { grid-row: auto; }
+      .panel { min-height: 340px; }
+      .kpis { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside>
+      <div class="brand">
+        <div class="brand-mark">⚽</div>
+        <div>
+          <p class="brand-title">Aptispace Forecast</p>
+          <p class="brand-sub">Dashboard CDM 2026</p>
+        </div>
+      </div>
+
+      <p class="nav-label">Navigation</p>
+      <nav class="nav" aria-label="Vues du dashboard">
+        <button class="active" type="button" data-view="overview"><span class="ico">▦</span> Vue d'ensemble</button>
+        <button type="button" data-view="data"><span class="ico">▤</span> Jeu de données</button>
+        <button type="button" data-view="model"><span class="ico">◈</span> Modèle</button>
+        <button type="button" data-view="tournament"><span class="ico">⛌</span> Phase finale</button>
+        <button type="button" data-view="teams"><span class="ico">⚑</span> Équipes</button>
+        <button type="button" data-view="decision"><span class="ico">✓</span> Décision</button>
+      </nav>
+
+      <div class="side-foot">
+        <div class="fav-card">
+          <span class="lbl">Favori au titre</span>
+          <div class="row">
+            <img class="flag lg" src="https://flagcdn.com/w40/br.png" alt="">
+            <strong>Brésil</strong>
+            <span class="pct">23,4 %</span>
+          </div>
+        </div>
+        <p class="side-meta">30 511 matchs internationaux · modèle XGBoost · tournoi simulé 20 000 fois.</p>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main>
+      <header class="topbar">
+        <div>
+          <h1 id="view-title">Vue d'ensemble</h1>
+          <p id="view-sub" class="sub">Le Brésil favori, mais un tournoi qui reste largement ouvert.</p>
+        </div>
+        <div class="status"><span class="dot"></span><span id="view-status">Synthèse</span></div>
+      </header>
+
+      <section class="kpis" id="kpis" aria-label="Indicateurs clés"></section>
+
+      <section class="views">
+        <!-- VUE D'ENSEMBLE -->
+        <div class="view view-overview active" data-panel="overview">
+          <div id="plotly-warning" class="warning">
+            Les graphiques interactifs n'ont pas pu être chargés (CDN Plotly indisponible).
+          </div>
+          <section class="panel span-row">
+            <div class="panel-head">
+              <div><h2>Course au titre</h2><p class="note">Probabilité de remporter la Coupe du Monde — top 8.</p></div>
+              <span class="badge">20 000 simulations</span>
+            </div>
+            <div class="panel-body"><div id="ov-title-race" class="chart"></div></div>
+          </section>
+          <section class="panel">
+            <div class="panel-head">
+              <div><h2>Champion projeté</h2><p class="note">Issue centrale de la phase finale.</p></div>
+              <span class="badge gold">Bracket</span>
+            </div>
+            <div class="panel-body">
+              <div class="champion">
+                <div class="ring"><div class="inner"><b>23%</b><small>de titre</small></div></div>
+                <h3><img class="flag lg" src="https://flagcdn.com/w40/br.png" alt="">Brésil</h3>
+                <p>Favori net, mais sous le seuil des 25 % : on ne parle pas de certitude.</p>
+                <div class="final-line">
+                  <img class="flag" src="https://flagcdn.com/w40/br.png" alt="">Brésil
+                  <span class="vs-pill">FINALE</span>
+                  France<img class="flag" src="https://flagcdn.com/w40/fr.png" alt="">
+                </div>
+              </div>
+            </div>
+          </section>
+          <section class="panel">
+            <div class="panel-head">
+              <div><h2>Favori vs reste du plateau</h2><p class="note">Part des titres simulés.</p></div>
+            </div>
+            <div class="panel-body"><div id="ov-uncertainty" class="chart"></div></div>
+          </section>
+        </div>
+
+        <!-- JEU DE DONNÉES -->
+        <div class="view view-data" data-panel="data">
+          <section class="panel">
+            <div class="panel-head">
+              <div><h2>Volume de matchs par année</h2><p class="note">Couverture du jeu de données, de 1993 à 2026.</p></div>
+              <span class="badge">1993 – 2026</span>
+            </div>
+            <div class="panel-body"><div id="da-matches-year" class="chart"></div></div>
+          </section>
+          <section class="panel">
+            <div class="panel-head">
+              <div><h2>Buts marqués par match</h2><p class="note">Moyenne par décennie — une légère baisse continue.</p></div>
+            </div>
+            <div class="panel-body"><div id="da-goals-decade" class="chart"></div></div>
+          </section>
+          <section class="panel">
+            <div class="panel-head">
+              <div><h2>Répartition des résultats</h2><p class="note">La variable cible du modèle — nettement déséquilibrée.</p></div>
+            </div>
+            <div class="panel-body"><div id="da-results" class="chart"></div></div>
+          </section>
+          <section class="panel">
+            <div class="panel-head">
+              <div><h2>L'écart de classement FIFA prédit le résultat</h2><p class="note">Plus l'écart est grand, plus le favori s'impose — et moins il y a de nuls.</p></div>
+            </div>
+            <div class="panel-body"><div id="da-rank-gap" class="chart"></div></div>
+          </section>
+        </div>
+
+        <!-- MODÈLE -->
+        <div class="view view-model" data-panel="model">
+          <section class="panel span-row">
+            <div class="panel-head">
+              <div><h2>Modèle vs règle naïve</h2><p class="note">Accuracy d'entraînement et de test, du plus simple au plus performant.</p></div>
+              <span class="badge gold">XGBoost retenu</span>
+            </div>
+            <div class="panel-body"><div id="md-model-comparison" class="chart"></div></div>
+          </section>
+          <section class="panel">
+            <div class="panel-head">
+              <div><h2>Variables les plus influentes</h2><p class="note">Importance dans la décision du modèle.</p></div>
+            </div>
+            <div class="panel-body"><div id="md-feature-impact" class="chart"></div></div>
+          </section>
+          <section class="panel">
+            <div class="panel-head">
+              <div><h2>Où le modèle se trompe</h2><p class="note">Poids historique vs rappel, par classe.</p></div>
+            </div>
+            <div class="panel-body"><div id="md-class-balance" class="chart"></div></div>
+          </section>
+        </div>
+
+        <!-- PHASE FINALE -->
+        <div class="view view-tournament" data-panel="tournament">
+          <section class="panel">
+            <div class="panel-head">
+              <div><h2>Bracket simulé, tour par tour</h2><p class="note">Taille du point = confiance du modèle ; rouge = match serré (&lt; 55 %).</p></div>
+            </div>
+            <div class="panel-body scroll">
+              <div class="toolbar" aria-label="Filtrer par tour">
+                <button class="active" type="button" data-round="all">Tous</button>
+                <button type="button" data-round="16es de finale">16es</button>
+                <button type="button" data-round="8es de finale">8es</button>
+                <button type="button" data-round="Quarts de finale">Quarts</button>
+                <button type="button" data-round="Demi-finales">Demies</button>
+                <button type="button" data-round="Finale">Finale</button>
+              </div>
+              <div id="tn-knockout"></div>
+            </div>
+          </section>
+          <section class="panel">
+            <div class="panel-head">
+              <div><h2>Podium projeté</h2><p class="note">Scénario central du bracket.</p></div>
+            </div>
+            <div class="panel-body">
+              <div class="podium">
+                <div class="pod-card p2">
+                  <div class="pod-team"><img class="flag" src="https://flagcdn.com/w40/fr.png" alt="">France</div>
+                  <div class="pod-step">2</div><div class="pod-meta">Finaliste</div>
+                </div>
+                <div class="pod-card p1">
+                  <div class="pod-team"><img class="flag" src="https://flagcdn.com/w40/br.png" alt="">Brésil</div>
+                  <div class="pod-step">1</div><div class="pod-meta">Champion</div>
+                </div>
+                <div class="pod-card p3">
+                  <div class="pod-team"><img class="flag" src="https://flagcdn.com/w40/ar.png" alt="">Argentine</div>
+                  <div class="pod-step">3</div><div class="pod-meta">3ᵉ place</div>
+                </div>
+              </div>
+              <div class="podium-note">
+                Le terrain est <b>neutralisé</b> : chaque match est prédit deux fois (sens inversé)
+                et moyenné, pour ne pas avantager artificiellement l'équipe « à domicile ».
+                Finale : <b>Brésil 56 %</b> face à la France.
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- ÉQUIPES -->
+        <div class="view view-teams" data-panel="teams">
+          <section class="panel">
+            <div class="panel-head">
+              <div><h2>Probabilité de titre</h2><p class="note">Le champ des possibles reste large.</p></div>
+              <span class="badge">20 000 simulations</span>
+            </div>
+            <div class="panel-body"><div id="tm-title-race" class="chart"></div></div>
+          </section>
+          <section class="panel">
+            <div class="panel-head">
+              <div><h2>Meilleurs vainqueurs de groupe</h2><p class="note">Classement par points espérés (xPts).</p></div>
+            </div>
+            <div class="panel-body"><div id="tm-group-winners" class="chart"></div></div>
+          </section>
+        </div>
+
+        <!-- DÉCISION -->
+        <div class="view view-decision" data-panel="decision">
+          <section class="panel">
+            <div class="panel-head">
+              <div><h2>Trois messages à retenir</h2><p class="note">Présenter le résultat sans le sur-vendre.</p></div>
+            </div>
+            <div class="panel-body">
+              <div class="insights">
+                <div class="insight">
+                  <div class="num">1</div>
+                  <div><strong>Un favori, pas une promesse</strong><span>Le Brésil gagne 23,4 % des simulations : c'est le scénario le plus fréquent, pas une certitude.</span></div>
+                </div>
+                <div class="insight">
+                  <div class="num">2</div>
+                  <div><strong>Le signal sportif est réel</strong><span>Forme récente, buts et force des adversaires complètent le rang FIFA et expliquent mieux le niveau réel.</span></div>
+                </div>
+                <div class="insight">
+                  <div class="num">3</div>
+                  <div><strong>Une limite assumée</strong><span>Les matchs nuls pèsent 23,3 % de l'historique mais ne sont presque jamais détectés (rappel 2,6 %).</span></div>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section class="panel">
+            <div class="panel-head">
+              <div><h2>Récapitulatif des indicateurs</h2><p class="note">Les chiffres clés du projet.</p></div>
+            </div>
+            <div class="panel-body">
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Indicateur</th><th>Valeur</th><th>Lecture</th><th>Statut</th></tr></thead>
+                  <tbody>
+                    <tr><td>Données exploitables</td><td>30 247 matchs</td><td>Base d'apprentissage propre après feature engineering.</td><td><span class="pill">Fiable</span></td></tr>
+                    <tr><td>Accuracy test</td><td>58,8 %</td><td>+10,3 points vs baseline naïve.</td><td><span class="pill">Solide</span></td></tr>
+                    <tr><td>ROC-AUC</td><td>0,730</td><td>Bonne séparation globale des classes.</td><td><span class="pill">Exploitable</span></td></tr>
+                    <tr><td>Rappel « match nul »</td><td>2,6 %</td><td>Issue la moins prévisible du football — jamais le résultat le plus probable.</td><td><span class="pill warn">Limite assumée</span></td></tr>
+                    <tr><td>Signal principal</td><td>Points pondérés</td><td>La force adverse affine la lecture du niveau.</td><td><span class="pill">Important</span></td></tr>
+                    <tr><td>Favori au titre</td><td><span class="cell-flag"><img class="flag" src="https://flagcdn.com/w40/br.png" alt="">Brésil 23,4 %</span></td><td>Favori net, tournoi encore ouvert.</td><td><span class="pill warn">Central</span></td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    "use strict";
+
+    const colors = {
+      ink: "#0b1726", muted: "#5d6b7e", line: "#dde5ee",
+      pitch: "#0a7d52", pitch2: "#0a6244", gold: "#dca424",
+      blue: "#2f6fd7", red: "#cf4f59", gray: "#8a98aa"
+    };
+
+    /* ---- Drapeaux (48 sélections CDM 2026) ---- */
+    const flags = {
+      "Algeria": "dz", "Argentina": "ar", "Australia": "au", "Austria": "at",
+      "Belgium": "be", "Bosnia and Herzegovina": "ba", "Brazil": "br",
+      "Canada": "ca", "Cape Verde": "cv", "Colombia": "co", "Croatia": "hr",
+      "Curacao": "cw", "Czech Republic": "cz", "DR Congo": "cd", "Ecuador": "ec",
+      "Egypt": "eg", "England": "gb-eng", "France": "fr", "Germany": "de",
+      "Ghana": "gh", "Haiti": "ht", "Iran": "ir", "Iraq": "iq",
+      "Ivory Coast": "ci", "Japan": "jp", "Jordan": "jo", "Mexico": "mx",
+      "Morocco": "ma", "Netherlands": "nl", "New Zealand": "nz", "Norway": "no",
+      "Panama": "pa", "Paraguay": "py", "Portugal": "pt", "Qatar": "qa",
+      "Saudi Arabia": "sa", "Scotland": "gb-sct", "Senegal": "sn",
+      "South Africa": "za", "South Korea": "kr", "Spain": "es", "Sweden": "se",
+      "Switzerland": "ch", "Tunisia": "tn", "Turkey": "tr", "United States": "us",
+      "Uruguay": "uy", "Uzbekistan": "uz"
+    };
+
+    function flagUrl(team) {
+      const code = flags[team];
+      return code ? "https://flagcdn.com/w40/" + code + ".png" : "";
+    }
+
+    function flagImagesFor(rows, options) {
+      options = options || {};
+      const x = options.x != null ? options.x : -0.7;
+      const sizex = options.sizex != null ? options.sizex : 0.55;
+      const sizey = options.sizey != null ? options.sizey : 0.46;
+      return rows.map(function (row) {
+        const source = flagUrl(row.team);
+        if (!source) return null;
+        return {
+          source: source, xref: "x", yref: "y", x: x, y: row.label,
+          sizex: sizex, sizey: sizey, xanchor: "right", yanchor: "middle", layer: "above"
+        };
+      }).filter(Boolean);
+    }
+
+    /* ---- Données issues des notebooks (cdm2026_titres / qualifies, notebook 06) ---- */
+    const titleRace = [
+      { team: "Brazil", proba: 23.4 }, { team: "Argentina", proba: 13.9 },
+      { team: "France", proba: 10.5 }, { team: "Spain", proba: 10.0 },
+      { team: "Germany", proba: 9.3 }, { team: "Netherlands", proba: 7.5 },
+      { team: "England", proba: 6.8 }, { team: "Portugal", proba: 5.1 }
+    ];
+
+    const bracketMatches = [
+      { round: "16es de finale", match: "M73", a: "South Korea", b: "Canada", winner: "South Korea", p: 59 },
+      { round: "16es de finale", match: "M74", a: "Brazil", b: "Uruguay", winner: "Brazil", p: 80 },
+      { round: "16es de finale", match: "M75", a: "Germany", b: "Czech Republic", winner: "Germany", p: 87 },
+      { round: "16es de finale", match: "M76", a: "Spain", b: "Scotland", winner: "Spain", p: 85 },
+      { round: "16es de finale", match: "M77", a: "Ivory Coast", b: "Norway", winner: "Norway", p: 52 },
+      { round: "16es de finale", match: "M78", a: "France", b: "Morocco", winner: "France", p: 81 },
+      { round: "16es de finale", match: "M79", a: "Mexico", b: "Ecuador", winner: "Mexico", p: 63 },
+      { round: "16es de finale", match: "M80", a: "England", b: "Sweden", winner: "England", p: 75 },
+      { round: "16es de finale", match: "M81", a: "Belgium", b: "Austria", winner: "Belgium", p: 69 },
+      { round: "16es de finale", match: "M82", a: "United States", b: "Bosnia and Herzegovina", winner: "United States", p: 79 },
+      { round: "16es de finale", match: "M83", a: "Netherlands", b: "Algeria", winner: "Netherlands", p: 85 },
+      { round: "16es de finale", match: "M84", a: "Portugal", b: "Croatia", winner: "Portugal", p: 65 },
+      { round: "16es de finale", match: "M85", a: "Switzerland", b: "Iran", winner: "Switzerland", p: 62 },
+      { round: "16es de finale", match: "M86", a: "Australia", b: "Egypt", winner: "Australia", p: 51 },
+      { round: "16es de finale", match: "M87", a: "Argentina", b: "Japan", winner: "Argentina", p: 78 },
+      { round: "16es de finale", match: "M88", a: "Colombia", b: "Turkey", winner: "Colombia", p: 63 },
+      { round: "8es de finale", match: "M89", a: "South Korea", b: "Germany", winner: "Germany", p: 82 },
+      { round: "8es de finale", match: "M90", a: "Brazil", b: "Norway", winner: "Brazil", p: 87 },
+      { round: "8es de finale", match: "M91", a: "Spain", b: "France", winner: "France", p: 54 },
+      { round: "8es de finale", match: "M92", a: "Mexico", b: "England", winner: "England", p: 62 },
+      { round: "8es de finale", match: "M93", a: "Netherlands", b: "Portugal", winner: "Portugal", p: 52 },
+      { round: "8es de finale", match: "M94", a: "Belgium", b: "United States", winner: "Belgium", p: 59 },
+      { round: "8es de finale", match: "M95", a: "Australia", b: "Colombia", winner: "Colombia", p: 75 },
+      { round: "8es de finale", match: "M96", a: "Switzerland", b: "Argentina", winner: "Argentina", p: 82 },
+      { round: "Quarts de finale", match: "M97", a: "Germany", b: "Brazil", winner: "Brazil", p: 64 },
+      { round: "Quarts de finale", match: "M98", a: "Portugal", b: "Belgium", winner: "Portugal", p: 59 },
+      { round: "Quarts de finale", match: "M99", a: "France", b: "England", winner: "France", p: 52 },
+      { round: "Quarts de finale", match: "M100", a: "Colombia", b: "Argentina", winner: "Argentina", p: 62 },
+      { round: "Demi-finales", match: "M101", a: "Brazil", b: "Portugal", winner: "Brazil", p: 72 },
+      { round: "Demi-finales", match: "M102", a: "France", b: "Argentina", winner: "France", p: 51 },
+      { round: "Finale", match: "M104", a: "Brazil", b: "France", winner: "Brazil", p: 56 }
+    ];
+
+    const modelRows = [
+      { name: "Baseline", train: 48.5, test: 48.5 },
+      { name: "Random Forest", train: 64.7, test: 55.8 },
+      { name: "XGBoost", train: 64.2, test: 58.8 }
+    ];
+
+    const features = [
+      { name: "Points pondérés", value: 0.202 },
+      { name: "Buts / force adverse", value: 0.151 },
+      { name: "Buts encaissés", value: 0.149 },
+      { name: "Écart de rang FIFA", value: 0.140 },
+      { name: "Niveau des adversaires", value: 0.091 }
+    ];
+
+    const classes = [
+      { name: "home_win", share: 48.5, recall: 87.3 },
+      { name: "away_win", share: 28.2, recall: 56.3 },
+      { name: "draw", share: 23.3, recall: 2.6 }
+    ];
+
+    const groupWinners = [
+      { team: "Brazil", group: "C", xpts: 7.34 },
+      { team: "Spain", group: "F", xpts: 7.15 },
+      { team: "Argentina", group: "J", xpts: 7.04 },
+      { team: "England", group: "L", xpts: 6.97 },
+      { team: "France", group: "I", xpts: 6.89 },
+      { team: "Germany", group: "E", xpts: 6.59 }
+    ];
+
+    const roundOrder = ["16es de finale", "8es de finale", "Quarts de finale", "Demi-finales", "Finale"];
+
+    /* ---- Exploration : calculé sur matches_clean.csv (notebooks 03 & 04) ---- */
+    const matchesYear = {
+      years: [1993,1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],
+      counts: [795,609,669,837,907,761,776,1040,1031,768,947,1079,804,842,988,1101,925,860,1115,1019,954,849,1039,920,924,929,1147,347,1115,969,1054,1229,997,165]
+    };
+    const goalsDecade = [
+      { decade: "1990s", goals: 2.85 }, { decade: "2000s", goals: 2.80 },
+      { decade: "2010s", goals: 2.73 }, { decade: "2020s", goals: 2.71 }
+    ];
+    const resultsDist = [
+      { label: "Victoire à domicile", key: "home_win", n: 14802, pct: 48.5 },
+      { label: "Victoire à l'extérieur", key: "away_win", n: 8588, pct: 28.1 },
+      { label: "Match nul", key: "draw", n: 7121, pct: 23.3 }
+    ];
+    const rankGap = [
+      { bin: "0–5", favWin: 36.5, draw: 24.7 },
+      { bin: "6–15", favWin: 41.5, draw: 28.3 },
+      { bin: "16–30", favWin: 48.6, draw: 26.0 },
+      { bin: "31–60", favWin: 56.9, draw: 24.1 },
+      { bin: "60+", favWin: 71.8, draw: 17.0 }
+    ];
+
+    /* ---- Métadonnées par vue ---- */
+    const FB = "https://flagcdn.com/w40/br.png";
+    const viewMeta = {
+      overview: {
+        title: "Vue d'ensemble",
+        sub: "Le Brésil favori, mais un tournoi qui reste largement ouvert.",
+        status: "Synthèse",
+        kpis: [
+          ["Champion projeté", "Brésil", "Issue centrale de la phase finale.", "gold", FB],
+          ["Chance de titre", "23,4 %", "Tournoi simulé 20 000 fois pour fiabiliser.", "green"],
+          ["Accuracy test", "58,8 %", "+10,3 points vs règle naïve.", ""],
+          ["Point faible", "Match nul", "Rappel de seulement 2,6 %.", "red"]
+        ]
+      },
+      data: {
+        title: "Le jeu de données",
+        sub: "30 511 matchs internationaux qui ont entraîné le modèle.",
+        status: "Exploration",
+        kpis: [
+          ["Matchs analysés", "30 511", "Rencontres internationales jouées de 1993 à 2026.", "green"],
+          ["Période couverte", "33 ans", "Profondeur historique du jeu de données.", ""],
+          ["Victoire à domicile", "48,5 %", "Le résultat le plus fréquent de l'historique.", "gold"],
+          ["Buts par match", "2,77", "Moyenne sur l'ensemble de la période.", ""]
+        ]
+      },
+      model: {
+        title: "Performance du modèle",
+        sub: "Le modèle apprend-il réellement plus qu'une règle simple ?",
+        status: "XGBoost",
+        kpis: [
+          ["Modèle retenu", "XGBoost", "Meilleure accuracy de test.", "gold"],
+          ["Baseline naïve", "48,5 %", "Toujours prédire l'équipe à domicile.", ""],
+          ["Gain", "+10,3 pts", "Écart face à la baseline.", "green"],
+          ["ROC-AUC", "0,730", "Bonne séparation des classes.", ""]
+        ]
+      },
+      tournament: {
+        title: "Phase à élimination directe",
+        sub: "Simulation des 16es de finale jusqu'à la finale.",
+        status: "Bracket",
+        kpis: [
+          ["Finale", "Brésil – France", "Le Brésil l'emporte à 56 %.", "gold"],
+          ["Champion", "Brésil", "Scénario déterministe du bracket.", "green", FB],
+          ["Troisième", "Argentine", "Complète le podium projeté.", "", "https://flagcdn.com/w40/ar.png"],
+          ["Tournoi rejoué", "20 000×", "Simulé autant de fois pour être sûr du résultat.", ""]
+        ]
+      },
+      teams: {
+        title: "Lecture par équipes",
+        sub: "Forces de groupe et probabilités de titre des favoris.",
+        status: "Équipes",
+        kpis: [
+          ["Top groupe", "Brésil", "7,34 points espérés (groupe C).", "gold", FB],
+          ["2ᵉ groupe", "Espagne", "7,15 xPts (groupe F).", "", "https://flagcdn.com/w40/es.png"],
+          ["3ᵉ groupe", "Argentine", "7,04 xPts (groupe J).", "", "https://flagcdn.com/w40/ar.png"],
+          ["Favori titre", "Brésil", "23,4 % de chance de titre.", "green", FB]
+        ]
+      },
+      decision: {
+        title: "Lecture décisionnelle",
+        sub: "Ce qu'il faut retenir, sans sur-vendre la prédiction.",
+        status: "Synthèse",
+        kpis: [
+          ["Message clé", "Favori ≠ certain", "Le Brésil reste sous 25 %.", "gold"],
+          ["Signal fort", "Écart de niveau", "FIFA + forme + force adverse.", "green"],
+          ["Risque", "Match nul", "Classe mal détectée par le modèle.", "red"],
+          ["Données", "30 511 matchs", "Historique international consolidé.", ""]
+        ]
+      }
+    };
+
+    /* ---- Plotly ---- */
+    const config = { responsive: true, displayModeBar: false };
+    const layoutBase = {
+      paper_bgcolor: "rgba(0,0,0,0)",
+      plot_bgcolor: "rgba(0,0,0,0)",
+      font: { family: "Inter, Segoe UI, Arial, sans-serif", color: colors.ink, size: 11.5 },
+      hoverlabel: { bgcolor: "#ffffff", bordercolor: colors.line, font: { color: colors.ink, family: "Inter, sans-serif" } }
+    };
+
+    function axisGrid(title) {
+      return {
+        title: { text: title || "", font: { size: 10.5, color: colors.muted } },
+        gridcolor: "#eaf0f6", zeroline: false, tickfont: { size: 10.5 }
+      };
+    }
+
+    function renderTitleRace(id) {
+      const data = titleRace.slice().reverse().map(function (d) { return { team: d.team, proba: d.proba, label: d.team }; });
+      Plotly.newPlot(id, [
+        {
+          type: "bar", orientation: "h",
+          y: data.map(function (d) { return d.label; }),
+          x: data.map(function (d) { return d.proba; }),
+          width: 0.32, marker: { color: "rgba(47,111,215,0.15)" }, hoverinfo: "skip"
+        },
+        {
+          type: "scatter", mode: "markers+text",
+          y: data.map(function (d) { return d.label; }),
+          x: data.map(function (d) { return d.proba; }),
+          marker: {
+            size: data.map(function (d) { return d.team === "Brazil" ? 24 : 16; }),
+            color: data.map(function (d) { return d.team === "Brazil" ? colors.gold : colors.pitch; }),
+            line: { color: "#ffffff", width: 2.5 }
+          },
+          text: data.map(function (d) { return d.proba.toFixed(1) + " %"; }),
+          textposition: "middle right", textfont: { size: 11, color: colors.ink },
+          cliponaxis: false,
+          hovertemplate: "%{y}<br>Chance de titre : %{x:.1f} %<extra></extra>"
+        }
+      ], Object.assign({}, layoutBase, {
+        margin: { l: 116, r: 48, t: 14, b: 40 },
+        xaxis: Object.assign(axisGrid("Probabilité de titre (%)"), { range: [0, 27] }),
+        yaxis: { automargin: true, tickfont: { size: 11.5 } },
+        showlegend: false,
+        shapes: [{ type: "line", x0: 25, x1: 25, y0: -0.6, y1: data.length - 0.4, line: { color: "#c2cedd", width: 1.3, dash: "dot" } }],
+        images: flagImagesFor(data)
+      }), config);
+    }
+
+    function renderKnockout(round) {
+      round = round || "all";
+      const rows = round === "all" ? bracketMatches : bracketMatches.filter(function (d) { return d.round === round; });
+      const yLabels = rows.map(function (d) { return d.match + "  " + d.a + " – " + d.b; });
+      Plotly.newPlot("tn-knockout", [{
+        type: "scatter", mode: "markers+text",
+        x: rows.map(function (d) { return d.round; }),
+        y: yLabels,
+        text: rows.map(function (d) { return "  " + d.winner; }),
+        textposition: "middle right", textfont: { size: 10.5, color: colors.ink },
+        cliponaxis: false,
+        marker: {
+          size: rows.map(function (d) { return 12 + (d.p - 50) * 0.86; }),
+          color: rows.map(function (d) { return d.winner === "Brazil" ? colors.gold : (d.p < 55 ? colors.red : colors.pitch); }),
+          opacity: 0.9, line: { color: "#ffffff", width: 2.4 }
+        },
+        customdata: rows.map(function (d) { return d.winner + " (" + d.p + " %)"; }),
+        hovertemplate: "%{y}<br>Qualifié : %{customdata}<extra></extra>"
+      }], Object.assign({}, layoutBase, {
+        height: round === "all" ? 880 : Math.max(320, rows.length * 48 + 130),
+        margin: { l: 210, r: 76, t: 16, b: 52 },
+        xaxis: { categoryorder: "array", categoryarray: roundOrder, gridcolor: "#eaf0f6", zeroline: false, tickfont: { size: 11 } },
+        yaxis: { automargin: true, autorange: "reversed", tickfont: { size: 10.5 } },
+        showlegend: false
+      }), config);
+    }
+
+    function renderModelComparison(id) {
+      Plotly.newPlot(id, [
+        {
+          type: "bar", name: "Entraînement",
+          x: modelRows.map(function (d) { return d.name; }),
+          y: modelRows.map(function (d) { return d.train; }),
+          marker: { color: "rgba(47,111,215,0.30)" },
+          hovertemplate: "%{x}<br>Train : %{y:.1f} %<extra></extra>"
+        },
+        {
+          type: "bar", name: "Test",
+          x: modelRows.map(function (d) { return d.name; }),
+          y: modelRows.map(function (d) { return d.test; }),
+          marker: { color: [colors.gray, colors.pitch, colors.gold] },
+          text: modelRows.map(function (d) { return d.test.toFixed(1) + " %"; }),
+          textposition: "outside", textfont: { size: 11, color: colors.ink },
+          hovertemplate: "%{x}<br>Test : %{y:.1f} %<extra></extra>"
+        }
+      ], Object.assign({}, layoutBase, {
+        margin: { l: 48, r: 18, t: 26, b: 40 },
+        barmode: "group", bargap: 0.34,
+        yaxis: Object.assign(axisGrid("Accuracy (%)"), { range: [0, 74] }),
+        xaxis: { tickfont: { size: 11.5 } },
+        legend: { orientation: "h", y: 1.16, x: 0, font: { size: 10.5 } }
+      }), config);
+    }
+
+    function renderFeatureImpact(id) {
+      const data = features.slice().reverse();
+      Plotly.newPlot(id, [{
+        type: "bar", orientation: "h",
+        y: data.map(function (d) { return d.name; }),
+        x: data.map(function (d) { return d.value; }),
+        marker: { color: data.map(function (d, i) { return i === data.length - 1 ? colors.gold : colors.pitch; }) },
+        text: data.map(function (d) { return d.value.toFixed(3); }),
+        textposition: "outside", textfont: { size: 10.5, color: colors.ink },
+        cliponaxis: false,
+        hovertemplate: "%{y}<br>Importance : %{x:.3f}<extra></extra>"
+      }], Object.assign({}, layoutBase, {
+        margin: { l: 142, r: 46, t: 14, b: 36 },
+        xaxis: Object.assign(axisGrid("Importance"), { range: [0, 0.24] }),
+        yaxis: { automargin: true, tickfont: { size: 11 } },
+        showlegend: false
+      }), config);
+    }
+
+    function renderClassBalance(id) {
+      const names = classes.map(function (d) { return d.name; }).reverse();
+      Plotly.newPlot(id, [
+        {
+          type: "bar", orientation: "h", name: "Poids historique",
+          y: names, x: classes.map(function (d) { return d.share; }).reverse(),
+          marker: { color: "rgba(47,111,215,0.24)" },
+          hovertemplate: "%{y}<br>Poids : %{x:.1f} %<extra></extra>"
+        },
+        {
+          type: "scatter", mode: "markers+text", name: "Rappel du modèle",
+          y: names, x: classes.map(function (d) { return d.recall; }).reverse(),
+          marker: { size: 15, color: [colors.pitch, colors.red, colors.pitch], line: { color: "#fff", width: 2 } },
+          text: classes.map(function (d) { return d.recall.toFixed(1) + " %"; }).reverse(),
+          textposition: "middle right", textfont: { size: 10.5, color: colors.ink },
+          cliponaxis: false,
+          hovertemplate: "%{y}<br>Rappel : %{x:.1f} %<extra></extra>"
+        }
+      ], Object.assign({}, layoutBase, {
+        margin: { l: 80, r: 44, t: 26, b: 36 },
+        xaxis: Object.assign(axisGrid("Pourcentage"), { range: [0, 98] }),
+        yaxis: { automargin: true, tickfont: { size: 11 } },
+        legend: { orientation: "h", y: 1.2, x: 0, font: { size: 10 } }
+      }), config);
+    }
+
+    function renderGroupWinners(id) {
+      const data = groupWinners.slice().reverse().map(function (d) {
+        return { team: d.team, group: d.group, xpts: d.xpts, label: d.team + " (" + d.group + ")" };
+      });
+      Plotly.newPlot(id, [{
+        type: "bar", orientation: "h",
+        y: data.map(function (d) { return d.label; }),
+        x: data.map(function (d) { return d.xpts; }),
+        marker: { color: data.map(function (d) { return d.team === "Brazil" ? colors.gold : colors.pitch; }) },
+        text: data.map(function (d) { return d.xpts.toFixed(2); }),
+        textposition: "outside", textfont: { size: 10.5, color: colors.ink },
+        cliponaxis: false,
+        hovertemplate: "%{y}<br>Points espérés : %{x:.2f}<extra></extra>"
+      }], Object.assign({}, layoutBase, {
+        margin: { l: 122, r: 42, t: 14, b: 40 },
+        xaxis: Object.assign(axisGrid("Points espérés (xPts)"), { range: [0, 8.2] }),
+        yaxis: { automargin: true, tickfont: { size: 11 } },
+        showlegend: false,
+        images: flagImagesFor(data, { x: -0.22, sizex: 0.42, sizey: 0.40 })
+      }), config);
+    }
+
+    function renderUncertainty(id) {
+      Plotly.newPlot(id, [{
+        type: "pie", hole: 0.62,
+        labels: ["Brésil", "Argentine", "France", "Autres nations"],
+        values: [23.4, 13.9, 10.5, 52.2],
+        sort: false, direction: "clockwise",
+        marker: { colors: [colors.gold, colors.pitch, colors.blue, "#d6dee8"], line: { color: "#ffffff", width: 3 } },
+        textinfo: "label+percent", textfont: { size: 10.5 },
+        hovertemplate: "%{label}<br>%{value:.1f} %<extra></extra>"
+      }], Object.assign({}, layoutBase, {
+        margin: { l: 10, r: 10, t: 12, b: 12 },
+        showlegend: false,
+        annotations: [
+          { text: "76,6 %", x: 0.5, y: 0.54, showarrow: false, font: { size: 19, color: colors.ink } },
+          { text: "hors favori", x: 0.5, y: 0.41, showarrow: false, font: { size: 9.5, color: colors.muted } }
+        ]
+      }), config);
+    }
+
+    function renderMatchesYear(id) {
+      Plotly.newPlot(id, [{
+        type: "scatter", mode: "lines", fill: "tozeroy",
+        x: matchesYear.years, y: matchesYear.counts,
+        line: { color: colors.pitch, width: 2.5, shape: "spline" },
+        fillcolor: "rgba(10,125,82,0.14)",
+        hovertemplate: "%{x}<br>%{y} matchs joués<extra></extra>"
+      }], Object.assign({}, layoutBase, {
+        margin: { l: 48, r: 20, t: 16, b: 38 },
+        xaxis: Object.assign(axisGrid(""), { dtick: 5 }),
+        yaxis: Object.assign(axisGrid("Matchs joués"), { rangemode: "tozero" }),
+        showlegend: false,
+        annotations: [{
+          x: 2020, y: 347, text: "2020 — Covid", showarrow: true,
+          ax: 0, ay: -34, font: { size: 9.5, color: colors.muted },
+          arrowcolor: "#c2cedd", arrowwidth: 1, arrowhead: 0
+        }]
+      }), config);
+    }
+
+    function renderGoalsDecade(id) {
+      Plotly.newPlot(id, [{
+        type: "scatter", mode: "lines+markers+text",
+        x: goalsDecade.map(function (d) { return d.decade; }),
+        y: goalsDecade.map(function (d) { return d.goals; }),
+        line: { color: colors.gold, width: 3, shape: "spline" },
+        marker: { size: 13, color: colors.gold, line: { color: "#fff", width: 2 } },
+        text: goalsDecade.map(function (d) { return d.goals.toFixed(2); }),
+        textposition: "top center", textfont: { size: 11.5, color: colors.ink },
+        cliponaxis: false,
+        hovertemplate: "%{x}<br>%{y:.2f} buts par match<extra></extra>"
+      }], Object.assign({}, layoutBase, {
+        margin: { l: 46, r: 24, t: 26, b: 38 },
+        xaxis: { tickfont: { size: 11.5 }, gridcolor: "#eaf0f6", zeroline: false },
+        yaxis: Object.assign(axisGrid("Buts par match"), { range: [2.4, 3.0] }),
+        showlegend: false
+      }), config);
+    }
+
+    function renderResults(id) {
+      const c = { home_win: colors.pitch, away_win: colors.blue, draw: colors.red };
+      const data = resultsDist.slice().reverse();
+      Plotly.newPlot(id, [{
+        type: "bar", orientation: "h",
+        y: data.map(function (d) { return d.label; }),
+        x: data.map(function (d) { return d.pct; }),
+        marker: { color: data.map(function (d) { return c[d.key]; }) },
+        text: data.map(function (d) { return d.pct.toFixed(1) + " %"; }),
+        textposition: "outside", textfont: { size: 12, color: colors.ink },
+        cliponaxis: false,
+        customdata: data.map(function (d) { return d.n; }),
+        hovertemplate: "%{y}<br>%{customdata} matchs (%{x:.1f} %)<extra></extra>"
+      }], Object.assign({}, layoutBase, {
+        margin: { l: 140, r: 56, t: 16, b: 38 },
+        xaxis: Object.assign(axisGrid("Part des matchs (%)"), { range: [0, 56] }),
+        yaxis: { automargin: true, tickfont: { size: 11.5 } },
+        showlegend: false
+      }), config);
+    }
+
+    function renderRankGap(id) {
+      Plotly.newPlot(id, [
+        {
+          type: "bar", name: "Victoire du favori",
+          x: rankGap.map(function (d) { return d.bin; }),
+          y: rankGap.map(function (d) { return d.favWin; }),
+          marker: { color: colors.pitch },
+          hovertemplate: "Écart %{x}<br>Victoire du favori : %{y:.1f} %<extra></extra>"
+        },
+        {
+          type: "bar", name: "Match nul",
+          x: rankGap.map(function (d) { return d.bin; }),
+          y: rankGap.map(function (d) { return d.draw; }),
+          marker: { color: colors.red },
+          hovertemplate: "Écart %{x}<br>Match nul : %{y:.1f} %<extra></extra>"
+        }
+      ], Object.assign({}, layoutBase, {
+        margin: { l: 46, r: 18, t: 30, b: 46 },
+        barmode: "group", bargap: 0.34,
+        xaxis: { title: { text: "Écart de classement FIFA entre les deux équipes", font: { size: 10.5, color: colors.muted } }, tickfont: { size: 11 }, zeroline: false },
+        yaxis: Object.assign(axisGrid("Pourcentage des matchs"), { range: [0, 80] }),
+        legend: { orientation: "h", y: 1.2, x: 0, font: { size: 10.5 } }
+      }), config);
+    }
+
+    /* ---- Orchestration des vues ---- */
+    const rendered = {};
+
+    function renderView(view) {
+      if (!window.Plotly) {
+        document.getElementById("plotly-warning").style.display = "block";
+        return;
+      }
+      if (rendered[view]) {
+        resizeView(view);
+        return;
+      }
+      if (view === "overview") { renderTitleRace("ov-title-race"); renderUncertainty("ov-uncertainty"); }
+      else if (view === "data") { renderMatchesYear("da-matches-year"); renderGoalsDecade("da-goals-decade"); renderResults("da-results"); renderRankGap("da-rank-gap"); }
+      else if (view === "model") { renderModelComparison("md-model-comparison"); renderFeatureImpact("md-feature-impact"); renderClassBalance("md-class-balance"); }
+      else if (view === "tournament") { renderKnockout("all"); }
+      else if (view === "teams") { renderTitleRace("tm-title-race"); renderGroupWinners("tm-group-winners"); }
+      rendered[view] = true;
+    }
+
+    function resizeView(view) {
+      const panel = document.querySelector('[data-panel="' + view + '"]');
+      if (!panel) return;
+      panel.querySelectorAll(".js-plotly-plot").forEach(function (el) { Plotly.Plots.resize(el); });
+    }
+
+    function setKpis(view) {
+      const html = viewMeta[view].kpis.map(function (k) {
+        const label = k[0], value = k[1], desc = k[2], tone = k[3] || "", flag = k[4];
+        const img = flag ? '<img class="flag lg" src="' + flag + '" alt="">' : "";
+        return '<article class="kpi ' + tone + '">' +
+               '<span class="lbl">' + label + '</span>' +
+               '<div class="val">' + img + value + '</div>' +
+               '<p class="desc">' + desc + '</p></article>';
+      }).join("");
+      document.getElementById("kpis").innerHTML = html;
+    }
+
+    let currentView = "overview";
+
+    function setView(view) {
+      currentView = view;
+      const meta = viewMeta[view];
+      document.getElementById("view-title").textContent = meta.title;
+      document.getElementById("view-sub").textContent = meta.sub;
+      document.getElementById("view-status").textContent = meta.status;
+      document.querySelectorAll("[data-panel]").forEach(function (p) {
+        p.classList.toggle("active", p.dataset.panel === view);
+      });
+      document.querySelectorAll("[data-view]").forEach(function (b) {
+        b.classList.toggle("active", b.dataset.view === view);
+      });
+      setKpis(view);
+      requestAnimationFrame(function () { renderView(view); });
+    }
+
+    document.querySelectorAll("[data-view]").forEach(function (button) {
+      button.addEventListener("click", function () { setView(button.dataset.view); });
+    });
+
+    /* ---- Filtres de tour (bracket) ---- */
+    document.querySelectorAll("[data-round]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        document.querySelectorAll("[data-round]").forEach(function (b) { b.classList.remove("active"); });
+        button.classList.add("active");
+        if (window.Plotly) renderKnockout(button.dataset.round);
+      });
+    });
+
+    /* ---- Redimensionnement ---- */
+    let resizeTimer;
+    window.addEventListener("resize", function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function () { if (window.Plotly) resizeView(currentView); }, 180);
+    });
+
+    setView("overview");
+  </script>
+</body>
+</html>

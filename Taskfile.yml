@@ -20,6 +20,7 @@ tasks:
       - rm -rf report/slides_files/ report/rapport_files/ report/installation_files/
       - cp build/report/rapport.pdf report/rapport.pdf
       - cp build/report/rapport.md README.md
+      - cp dashboard.html build/report/dashboard.html
 
   html:
     desc: Compile les notebooks puis génère le rapport au format HTML uniquement

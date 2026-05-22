@@ -1,7 +1,7 @@
 # Prédiction des résultats de matchs de football internationaux
 Étudiant(e) 1 : Joud Atallah, Étudiant(e) 2 : Walid Hdilou, Étudiant(e)
 3 : Amine Kaoutar
-2026-05-21
+2026-05-22
 
 - [Introduction et Contexte Métier](#sec-intro)
   - [Contexte du Projet](#contexte-du-projet)
@@ -759,8 +759,8 @@ F1-score et ROC-AUC. Les hyperparamètres sont ensuite optimisés par
 recherche aléatoire en validation croisée. Le modèle ainsi validé est
 enfin appliqué au **bracket officiel de la phase à élimination directe**
 : la simulation des 16ᵉˢ de finale jusqu’à la finale, complétée par une
-validation Monte-Carlo (20 000 tirages), désigne le **champion du monde
-2026 prédit** et quantifie l’incertitude de la compétition.
+validation sur 20 000 simulations du tournoi, désigne le **champion du
+monde 2026 prédit** et quantifie l’incertitude de la compétition.
 
 ## Chapitre 6 : Travaux Pratiques d’Évaluation & Robustesse
 
@@ -858,7 +858,7 @@ ainsi les 16ᵉˢ jusqu’à la finale.
 
 #### Le parcours du champion
 
-#### 5.2 Robustesse — probabilités de titre par Monte-Carlo
+#### 5.2 Robustesse — probabilités de titre par simulation répétée
 
 La simulation déterministe désigne un seul champion, mais elle ignore
 les **surprises** (un favori à 60 % perd tout de même 4 fois sur 10).
@@ -880,9 +880,9 @@ hasard selon sa probabilité. La fréquence de victoire finale de chaque
     officiel (avantage du terrain neutralisé), on simule l’intégralité
     du tournoi des 16ᵉˢ de finale jusqu’à la finale.
 4.  **Prédiction finale** : le modèle désigne un **champion du monde
-    2026** ; la validation **Monte-Carlo** (20 000 simulations) confirme
-    qu’il s’agit du favori le plus probable, tout en quantifiant
-    l’incertitude réelle de la compétition.
+    2026** ; la validation par **20 000 simulations** du tournoi
+    confirme qu’il s’agit du favori le plus probable, tout en
+    quantifiant l’incertitude réelle de la compétition.
 5.  **Limites** : pas de gestion des blessures, suspensions ni dynamique
     de tournoi ; le modèle reste une estimation probabiliste — le
     football garde sa part d’imprévu.
@@ -936,7 +936,7 @@ pipeline :
 - `cdm2026_podium.csv` — le podium issu de la simulation déterministe du
   bracket (notebook 06) ;
 - `cdm2026_titres.csv` — la **probabilité de titre** de chaque équipe,
-  estimée par 20 000 simulations Monte-Carlo (notebook 06).
+  estimée en rejouant le tournoi 20 000 fois (notebook 06).
 
 ### 3. Le récit — structurer le message (SCQA + pyramide de Minto)
 
@@ -970,39 +970,42 @@ non-spécialiste, on la **traduit**.
 #### 4.1 Le grand favori — probabilités de titre
 
 La visualisation centrale du projet : la probabilité, pour chaque
-nation, de remporter la Coupe du Monde 2026 (issue des 20 000
-simulations Monte-Carlo).
+nation, de remporter la Coupe du Monde 2026 (issue de 20 000 simulations
+du tournoi).
 
 #### 4.2 Le podium prédit et les 12 vainqueurs de groupe
 
-#### 4.3 Vers une restitution interactive (recommandation)
+#### 4.3 Un tableau de bord interactif pour la restitution
 
 Le cours (§7.2) rappelle qu’*« en 2026, fournir un rapport PDF statique
 à un décideur n’est plus suffisant »*. Les graphiques ci-dessus,
-parfaits pour un rapport écrit, gagneraient à être déclinés en **tableau
-de bord interactif** permettant le *drill-down* (survol pour lire une
-valeur, filtrage par groupe, par confédération…).
+parfaits pour un rapport écrit, gagnent à être déclinés en **tableau de
+bord interactif** permettant le *drill-down* : survol pour lire une
+valeur, filtrage par tour, navigation par thème.
 
-L’outil recommandé par le cours est **Plotly** (graphiques web
-interactifs), encapsulé dans une application **Streamlit** (idéal pour
-un prototype rapide). Exemple d’implémentation de la visualisation des
-favoris :
+C’est l’objet du livrable `dashboard.html`. Construit avec **Plotly**
+(la bibliothèque de graphiques web interactifs recommandée par le
+cours), il s’agit d’un **tableau de bord autonome** — un fichier HTML
+unique, ouvrable dans n’importe quel navigateur, sans installation ni
+serveur. Il organise les résultats du projet en **six vues** accessibles
+depuis une barre latérale :
 
-``` python
-# Tableau de bord interactif — à déployer avec : streamlit run dashboard.py
-import streamlit as st
-import plotly.express as px
-import pandas as pd
+- **Vue d’ensemble** — course au titre, probabilité du champion et part
+  d’incertitude ;
+- **Jeu de données** — volume de matchs, buts par décennie, répartition
+  des résultats et poids de l’écart de classement FIFA ;
+- **Modèle** — comparaison Baseline / Random Forest / XGBoost, variables
+  influentes, classes mal détectées ;
+- **Phase finale** — bracket simulé des 16ᵉˢ à la finale, filtrable par
+  tour, et podium projeté ;
+- **Équipes** — probabilités de titre et meilleurs vainqueurs de groupe
+  (xPts) ;
+- **Décision** — trois messages clés et récapitulatif des indicateurs.
 
-titres = pd.read_csv('data/processed/cdm2026_titres.csv')
-st.title('Coupe du Monde 2026 — Probabilités de titre')
-n = st.slider("Nombre d'équipes à afficher", 5, 32, 12)
-fig = px.bar(titres.head(n), x='proba_titre', y='equipe', orientation='h',
-             labels={'proba_titre': 'Probabilité de titre'})
-st.plotly_chart(fig)   # survol, zoom et filtres disponibles dans le navigateur
-```
-
-Ce livrable interactif constitue une **perspective naturelle** du
+Tous les chiffres affichés sont chargés depuis les fichiers produits par
+les notebooks 05 et 06 (`cdm2026_qualifies.csv`, `cdm2026_titres.csv`,
+`cdm2026_podium.csv`) : le tableau de bord est donc strictement cohérent
+avec ce rapport. Il constitue le **livrable de communication** du
 projet, au-delà du rapport PDF.
 
 ### 5. Transparence et communication de l’incertitude (§7.3 du cours)
@@ -1063,9 +1066,10 @@ performance récente pondérée par la force des adversaires.
 2.  **Pour une fédération** : utiliser les probabilités de qualification
     par tour comme outil d’**aide à la préparation** (identifier les
     adversaires probables).
-3.  **Pour la suite du projet** : déployer le **tableau de bord
-    interactif** (Plotly / Streamlit) et enrichir le modèle avec les
-    données d’effectifs pour réduire l’incertitude épistémique.
+3.  **Pour la suite du projet** : enrichir le **tableau de bord
+    interactif** (`dashboard.html`) de nouvelles vues et compléter le
+    modèle avec les données d’effectifs pour réduire l’incertitude
+    épistémique.
 
 ------------------------------------------------------------------------
 
@@ -1095,63 +1099,30 @@ façon professionnelle.
 
 </iframe>
 
-### 📊 Exemple de Dashboard Dynamique (OJS / Plotly)
+### 📊 Tableau de bord interactif
 
-Voici un exemple minimal de code montrant comment intégrer un graphique
-dynamique contrôlé par un composant d’interface utilisateur en
-Observable JS (OJS).
+Le livrable de restitution du projet est un **tableau de bord autonome**
+: `dashboard.html`, un fichier unique ouvrable dans n’importe quel
+navigateur, sans installation. Il synthétise l’ensemble du pipeline en
+**six vues** que l’on parcourt depuis une barre latérale.
 
-``` {ojs}
-//| echo: true
-// Boutons de sélection interactifs OJS
-viewof selectedCategory = Inputs.select(["Toutes", "A", "B", "C"], {value: "Toutes", label: "Filtrer par Catégorie :"})
-```
+| Vue | Contenu |
+|----|----|
+| **Vue d’ensemble** | Course au titre, probabilité du champion et part d’incertitude. |
+| **Jeu de données** | Volume de matchs, buts par décennie, répartition des résultats, poids de l’écart de classement FIFA. |
+| **Modèle** | Comparaison Baseline / Random Forest / XGBoost, variables influentes, classes mal détectées. |
+| **Phase finale** | Bracket simulé des 16ᵉˢ à la finale, filtrable par tour, et podium projeté. |
+| **Équipes** | Probabilités de titre et meilleurs vainqueurs de groupe (xPts). |
+| **Décision** | Trois messages clés et récapitulatif des indicateurs. |
 
-``` {ojs}
-//| echo: false
-// Données simulées réactives
-data = [
-  {timestamp: "2026-05-18T00:00:00Z", value: 10.5, category: "A"},
-  {timestamp: "2026-05-18T02:00:00Z", value: 12.1, category: "A"},
-  {timestamp: "2026-05-18T04:00:00Z", value: 14.7, category: "A"},
-  {timestamp: "2026-05-18T05:00:00Z", value: 15.2, category: "A"},
-  {timestamp: "2026-05-18T06:00:00Z", value: 16.0, category: "B"},
-  {timestamp: "2026-05-18T07:00:00Z", value: 18.3, category: "B"},
-  {timestamp: "2026-05-18T09:00:00Z", value: 21.5, category: "B"},
-  {timestamp: "2026-05-18T10:00:00Z", value: 22.0, category: "B"},
-  {timestamp: "2026-05-18T12:00:00Z", value: 25.4, category: "C"},
-  {timestamp: "2026-05-18T13:00:00Z", value: 26.1, category: "C"},
-  {timestamp: "2026-05-18T15:00:00Z", value: 28.9, category: "C"},
-  {timestamp: "2026-05-18T16:00:00Z", value: 30.2, category: "C"}
-]
+Chaque chiffre du tableau de bord est issu directement des notebooks 05
+et 06 : il est donc strictement cohérent avec le présent rapport. Le
+favori désigné — le **Brésil, 23,4 % de chance de titre** — y est
+présenté comme un scénario probable et non comme une certitude,
+conformément à la démarche de communication honnête de l’incertitude.
 
-// Filtrage réactif de la donnée
-filteredData = selectedCategory === "Toutes" 
-  ? data 
-  : data.filter(d => d.category === selectedCategory)
-
-// Tracé interactif avec la librairie Plotly
-Plotly.newPlot('dynamic-chart', [{
-  x: filteredData.map(d => d.timestamp),
-  y: filteredData.map(d => d.value),
-  type: 'scatter',
-  mode: 'lines+markers',
-  marker: {color: '#1A73E8', size: 8},
-  line: {shape: 'spline', color: '#1A73E8', width: 3}
-}], {
-  title: 'Évolution Dynamique des Valeurs (Filtrée)',
-  margin: {t: 50, b: 50, l: 50, r: 50},
-  paper_bgcolor: 'rgba(0,0,0,0)',
-  plot_bgcolor: 'rgba(0,0,0,0)',
-  xaxis: {gridcolor: '#E5E7EB'},
-  yaxis: {gridcolor: '#E5E7EB'}
-})
-```
-
-<div id="dynamic-chart"
-style="width:100%; height:400px; background: white; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-
-</div>
+> **Pour l’explorer :** ouvrir le fichier `dashboard.html` situé à la
+> racine du dépôt.
 
 </div>
 
