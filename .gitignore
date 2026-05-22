@@ -15,10 +15,8 @@ venv/
 env/
 .env/
 
-# Données (ignorer les gros fichiers sauf notre dataset d'exemple brut)
-data/raw/*
-!data/raw/raw_data_sample.csv
-!data/raw/.gitkeep
+# Données : les données brutes sont versionnées pour que l'équipe puisse tester.
+# Seules les données dérivées (générées par les notebooks) restent ignorées.
 data/processed/*
 !data/processed/.gitkeep
 
