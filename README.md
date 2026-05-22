@@ -155,6 +155,16 @@ avec pour objectif final d’estimer le vainqueur de la Coupe du Monde
 | Anciens noms de pays | `former_names.csv` | Kaggle (martj42) |
 | Classement FIFA historique (1992 → 2024) | `fifa_ranking-2024-06-20.csv` | Kaggle — *FIFA World Ranking* |
 
+**Acquisition via Kaggle Hub.** Les jeux de données sont récupérés
+depuis **Kaggle Hub** (paquet `kagglehub`), à partir de deux datasets :
+`martj42/international-football-results-from-1872-to-2017` (résultats,
+tirs au but, buteurs, anciens noms) et `cashncarry/fifaworldranking`
+(classement FIFA). Les datasets Kaggle étant mis à jour en continu, un
+**instantané** des fichiers bruts est versionné dans `data/raw/` pour
+garantir la **reproductibilité** du projet : le pipeline lit cet
+instantané en priorité et ne télécharge depuis Kaggle Hub que si un
+fichier est absent (clone vierge du dépôt).
+
 > ⚠️ Le classement FIFA est **historisé** : chaque match reçoit le
 > classement réellement en vigueur **à sa date**, et non un classement
 > actuel. C’est indispensable pour une prédiction fiable — appliquer un

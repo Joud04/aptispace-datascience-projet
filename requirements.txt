@@ -2,6 +2,9 @@
 pandas>=2.0.0
 numpy>=1.24.0
 
+# Acquisition des données depuis Kaggle Hub
+kagglehub>=0.3.0
+
 # Machine Learning & Deep Learning
 scikit-learn>=1.2.0
 xgboost>=2.0.0
