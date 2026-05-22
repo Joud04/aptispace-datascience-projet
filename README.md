@@ -457,31 +457,7 @@ non, mieux classée que son adversaire — un premier aperçu du pouvoir
 prédictif du classement. C’est un cas typique de *split-apply-combine*
 (chapitre 4.4.1 du cours).
 
-### 12. Pivot table — taux de victoire croisé
-
-Au-delà du simple `groupby`, le **pivot table** (chapitre 4.4.2 du
-cours) permet de croiser deux dimensions et de visualiser l’effet
-conjoint sur une troisième. Ici, on croise :
-
-- **lignes** : `tournoi_majeur` (Coupe du Monde / continentaux /
-  Confederations Cup, ou autre) ;
-- **colonnes** : `neutral` (terrain neutre ou non) ;
-- **cellules** : taux de victoire à domicile (%).
-
-C’est la façon la plus directe de confirmer que l’**avantage à domicile
-disparaît effectivement sur terrain neutre**, et de voir si la nature du
-tournoi joue un rôle indépendant.
-
-### 13. Binning — taux de victoire par classe d’écart de classement
-
-Au-delà du simple binaire « mieux classé / moins bien classé » étudié en
-section 11, on découpe `rank_difference` en **5 classes** via `pd.cut`
-(chapitre 4.4.3 du cours, *binning / discrétisation*). Le bar plot
-révèle une **progression monotone** du taux de victoire à domicile en
-fonction de l’écart de classement — un signal très exploitable pour la
-modélisation au Jalon 2.
-
-### 14. Synthèse — insights majeurs
+### 12. Synthèse — insights majeurs
 
 À l’issue de l’exploration, cinq constats structurent la suite du projet
 :
@@ -981,23 +957,27 @@ Le cours (§7.2) rappelle qu’*« en 2026, fournir un rapport PDF statique
 à un décideur n’est plus suffisant »*. Les graphiques ci-dessus,
 parfaits pour un rapport écrit, gagnent à être déclinés en **tableau de
 bord interactif** permettant le *drill-down* : survol pour lire une
-valeur, filtrage par tour, navigation par thème.
+valeur, filtrage par tour, suivi du parcours d’une équipe, navigation
+par thème.
 
-C’est l’objet du livrable `dashboard.html`. Construit avec **Plotly**
-(la bibliothèque de graphiques web interactifs recommandée par le
-cours), il s’agit d’un **tableau de bord autonome** — un fichier HTML
-unique, ouvrable dans n’importe quel navigateur, sans installation ni
-serveur. Il organise les résultats du projet en **six vues** accessibles
-depuis une barre latérale :
+C’est l’objet du livrable `dashboard.html`. Ses graphiques sont
+construits avec **Plotly** (la bibliothèque de graphiques web
+interactifs recommandée par le cours) ; il s’agit d’un **tableau de bord
+autonome** — un fichier HTML unique, ouvrable dans n’importe quel
+navigateur, sans installation ni serveur. Il organise les résultats du
+projet en **sept vues** accessibles depuis une barre latérale :
 
 - **Vue d’ensemble** — course au titre, probabilité du champion et part
   d’incertitude ;
 - **Jeu de données** — volume de matchs, buts par décennie, répartition
   des résultats et poids de l’écart de classement FIFA ;
 - **Modèle** — comparaison Baseline / Random Forest / XGBoost, variables
-  influentes, classes mal détectées ;
-- **Phase finale** — bracket simulé des 16ᵉˢ à la finale, filtrable par
-  tour, et podium projeté ;
+  influentes, classes mal détectées, et explication des choix de
+  variables et d’hyperparamètres ;
+- **Phase de groupes** — les 12 groupes officiels (tirage du 5
+  décembre 2025) avec drapeaux et classement projeté de chaque équipe ;
+- **Phase finale** — bracket interactif des 16ᵉˢ à la finale, filtrable
+  par tour, avec suivi du parcours d’une équipe, et podium projeté ;
 - **Équipes** — probabilités de titre et meilleurs vainqueurs de groupe
   (xPts) ;
 - **Décision** — trois messages clés et récapitulatif des indicateurs.
@@ -1104,14 +1084,15 @@ façon professionnelle.
 Le livrable de restitution du projet est un **tableau de bord autonome**
 : `dashboard.html`, un fichier unique ouvrable dans n’importe quel
 navigateur, sans installation. Il synthétise l’ensemble du pipeline en
-**six vues** que l’on parcourt depuis une barre latérale.
+**sept vues** que l’on parcourt depuis une barre latérale.
 
 | Vue | Contenu |
 |----|----|
 | **Vue d’ensemble** | Course au titre, probabilité du champion et part d’incertitude. |
 | **Jeu de données** | Volume de matchs, buts par décennie, répartition des résultats, poids de l’écart de classement FIFA. |
-| **Modèle** | Comparaison Baseline / Random Forest / XGBoost, variables influentes, classes mal détectées. |
-| **Phase finale** | Bracket simulé des 16ᵉˢ à la finale, filtrable par tour, et podium projeté. |
+| **Modèle** | Comparaison Baseline / Random Forest / XGBoost, variables influentes, classes mal détectées, et explication des choix de variables et d’hyperparamètres. |
+| **Phase de groupes** | Les 12 groupes officiels avec drapeaux et classement projeté de chaque équipe (points espérés). |
+| **Phase finale** | Bracket interactif des 16ᵉˢ à la finale, filtrable par tour, suivi du parcours d’une équipe, et podium projeté. |
 | **Équipes** | Probabilités de titre et meilleurs vainqueurs de groupe (xPts). |
 | **Décision** | Trois messages clés et récapitulatif des indicateurs. |
 
@@ -1139,7 +1120,9 @@ projet.
 
 | Outil d’IA | Cas d’usage (Pourquoi ?) | Méthode d’utilisation (Comment ?) | Rôle et Validation Humaine |
 |:---|:---|:---|:---|
-| **\[Outil d’IA\]** | *\[À compléter par les étudiants\]* | *\[À compléter par les étudiants\]* | *\[À compléter par les étudiants\]* |
+| **Claude Code** | Accélérer le développement du pipeline et le débogage du code Python. | Assistant en ligne de commande sollicité sur des extraits précis : *feature engineering*, jointures `pandas`, modèles `scikit-learn` / `XGBoost`. | L’équipe conçoit la démarche et les choix de modélisation. Chaque suggestion est relue, exécutée sur les données réelles et validée avant intégration — aucun code accepté sans test. |
+| **Claude Code** | Structurer et relire la rédaction du rapport et des notebooks. | Reformulation de passages, vérification de cohérence terminologique, aide à la structuration narrative (SCQA, pyramide de Minto). | Les analyses, l’interprétation des résultats et les conclusions sont rédigées par l’équipe. L’IA n’intervient que sur la forme ; tout chiffre est vérifié contre les sorties des notebooks. |
+| **Claude Code** | Construire le tableau de bord interactif (`dashboard.html`). | Génération du code HTML / CSS / JavaScript du livrable de restitution, à partir des résultats produits par le pipeline. | Les données proviennent exclusivement des fichiers CSV des notebooks 05 et 06. Rendu et cohérence avec le rapport contrôlés par l’équipe. |
 
 ## Principes de Rigueur et Responsabilité
 

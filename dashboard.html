@@ -327,8 +327,13 @@
     }
 
     .view-model {
-      grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .view-groups {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: minmax(0, 1fr);
     }
 
     .view-data {
@@ -656,6 +661,203 @@
 
     .flag.lg { width: 27px; height: 19px; }
 
+    /* ---------- Phase de groupes ---------- */
+    .groups-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      padding: 6px 16px 16px;
+      align-content: start;
+    }
+
+    .group-card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      overflow: hidden;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+
+    .group-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-sm);
+      border-color: #c2cedd;
+    }
+
+    .gc-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 12px;
+      background: linear-gradient(100deg, var(--sidebar), var(--sidebar-2));
+      color: #fff;
+    }
+
+    .gc-head b { font-size: 12.5px; font-weight: 900; letter-spacing: .03em; }
+    .gc-head span {
+      font-size: 9px; font-weight: 800;
+      letter-spacing: .04em; text-transform: uppercase;
+      color: #93a6bd;
+    }
+
+    .gc-team {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-top: 1px solid var(--line);
+      font-size: 11.5px;
+      transition: opacity .16s ease;
+    }
+
+    .gc-team .rk {
+      width: 18px; height: 18px;
+      flex: 0 0 auto;
+      display: grid; place-items: center;
+      border-radius: 6px;
+      font-size: 9.5px; font-weight: 900;
+      color: #fff; background: #aab6c4;
+    }
+
+    .gc-team.q1 .rk { background: var(--gold); color: #2a1f06; }
+    .gc-team.q2 .rk { background: var(--pitch); }
+    .gc-team.q3 .rk { background: var(--blue); }
+
+    .gc-team .nm {
+      flex: 1; min-width: 0;
+      font-weight: 800;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    .gc-team .xp { flex: 0 0 auto; font-size: 10px; font-weight: 800; color: var(--faint); }
+    .gc-team.out { opacity: .52; }
+    .gc-team.out .nm { font-weight: 600; }
+
+    .groups-grid.f-qualified .gc-team.out { opacity: .24; }
+    .groups-grid.f-winners .gc-team:not(.q1) { opacity: .26; }
+
+    /* ---------- Bracket interactif ---------- */
+    .bracket-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(206px, 1fr));
+      gap: 11px;
+      padding: 8px 16px 16px;
+      align-content: start;
+    }
+
+    .match-card {
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #fff;
+      overflow: hidden;
+      transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+    }
+
+    .match-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); border-color: #c2cedd; }
+    .match-card.on-path { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(220, 164, 36, 0.32); }
+
+    .mc-id {
+      padding: 7px 11px 3px;
+      font-size: 9px; font-weight: 900;
+      letter-spacing: .07em; text-transform: uppercase;
+      color: var(--faint);
+    }
+
+    .mc-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 11px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .mc-row .nm {
+      flex: 1; min-width: 0;
+      font-weight: 700;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    .mc-row .pct { flex: 0 0 auto; font-size: 11px; font-weight: 900; color: var(--faint); }
+    .mc-row.win { background: var(--pitch-soft); }
+    .mc-row.win .nm { font-weight: 900; color: var(--pitch-2); }
+    .mc-row.win .pct { color: var(--pitch-2); }
+    .mc-row.win.gold { background: #fbf1d6; }
+    .mc-row.win.gold .nm, .mc-row.win.gold .pct { color: var(--gold-2); }
+    .mc-row.tracked .nm { text-decoration: underline; text-decoration-color: var(--gold); text-underline-offset: 2px; }
+
+    .mc-bar { height: 4px; background: #eef2f7; }
+    .mc-bar i { display: block; height: 100%; background: var(--pitch); }
+    .match-card.tight .mc-bar i { background: var(--red); }
+
+    .track-chip {
+      display: none;
+      align-items: center;
+      gap: 7px;
+      margin-left: auto;
+      padding: 5px 6px 5px 11px;
+      border-radius: 999px;
+      background: #fbf1d6;
+      color: var(--gold-2);
+      font-size: 10.5px;
+      font-weight: 800;
+    }
+
+    .track-chip.on { display: inline-flex; }
+    .track-chip button {
+      border: 0; cursor: pointer;
+      width: 17px; height: 17px;
+      border-radius: 50%;
+      background: var(--gold-2); color: #fff;
+      font: inherit; font-size: 10px; font-weight: 900;
+      line-height: 1;
+    }
+
+    /* ---------- Explications ---------- */
+    .explain { padding: 12px 16px 16px; display: grid; gap: 11px; align-content: start; }
+
+    .explain-block {
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #f8fbfd;
+      padding: 12px 13px;
+    }
+
+    .explain-block h3 {
+      margin: 0 0 7px;
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12.5px; font-weight: 900;
+    }
+
+    .explain-block h3 .ei {
+      width: 22px; height: 22px;
+      flex: 0 0 auto;
+      display: grid; place-items: center;
+      border-radius: 7px;
+      background: var(--sidebar); color: #fff;
+      font-size: 11px; font-weight: 900;
+    }
+
+    .explain-block p { margin: 0; font-size: 11.5px; line-height: 1.55; color: var(--muted); }
+    .explain-block p + p { margin-top: 7px; }
+    .explain-block b { color: var(--ink); }
+    .explain-block code {
+      font-family: "Consolas", "Menlo", monospace;
+      font-size: 10.5px;
+      padding: 1px 4px;
+      border-radius: 4px;
+      background: #eef2f7;
+      color: var(--pitch-2);
+    }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+    .chips span {
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid var(--line);
+      font-size: 10px; font-weight: 800; color: var(--muted);
+    }
+    .chips span b { color: var(--pitch-2); }
+
     /* ---------- Warning ---------- */
     .warning {
       display: none;
@@ -711,6 +913,8 @@
       .span-row { grid-row: auto; }
       .panel { min-height: 340px; }
       .kpis { grid-template-columns: repeat(2, 1fr); }
+      .groups-grid { grid-template-columns: repeat(2, 1fr); }
+      .panel-body.scroll { overflow: visible; }
     }
   </style>
 </head>
@@ -731,6 +935,7 @@
         <button class="active" type="button" data-view="overview"><span class="ico">▦</span> Vue d'ensemble</button>
         <button type="button" data-view="data"><span class="ico">▤</span> Jeu de données</button>
         <button type="button" data-view="model"><span class="ico">◈</span> Modèle</button>
+        <button type="button" data-view="groups"><span class="ico">⊞</span> Phase de groupes</button>
         <button type="button" data-view="tournament"><span class="ico">⛌</span> Phase finale</button>
         <button type="button" data-view="teams"><span class="ico">⚑</span> Équipes</button>
         <button type="button" data-view="decision"><span class="ico">✓</span> Décision</button>
@@ -831,7 +1036,7 @@
 
         <!-- MODÈLE -->
         <div class="view view-model" data-panel="model">
-          <section class="panel span-row">
+          <section class="panel">
             <div class="panel-head">
               <div><h2>Modèle vs règle naïve</h2><p class="note">Accuracy d'entraînement et de test, du plus simple au plus performant.</p></div>
               <span class="badge gold">XGBoost retenu</span>
@@ -840,9 +1045,31 @@
           </section>
           <section class="panel">
             <div class="panel-head">
-              <div><h2>Variables les plus influentes</h2><p class="note">Importance dans la décision du modèle.</p></div>
+              <div><h2>Variables les plus influentes</h2><p class="note">Importance de Gini dans la décision du modèle.</p></div>
             </div>
             <div class="panel-body"><div id="md-feature-impact" class="chart"></div></div>
+          </section>
+          <section class="panel">
+            <div class="panel-head">
+              <div><h2>Pourquoi ces choix ?</h2><p class="note">Les variables et les réglages derrière la prédiction.</p></div>
+              <span class="badge">Méthode</span>
+            </div>
+            <div class="panel-body scroll">
+              <div class="explain">
+                <div class="explain-block">
+                  <h3><span class="ei">1</span> Pourquoi les buts comme variables ?</h3>
+                  <p>Le classement FIFA n'est qu'une <b>photo figée</b> : il ignore la dynamique réelle d'une équipe. On reconstruit donc, pour chaque match, l'<b>historique des buts</b> marqués et encaissés — l'attaque, la solidité défensive et la forme des 5 derniers matchs.</p>
+                  <p>Ces buts sont <b>pondérés par la force de l'adversaire</b> : marquer face au 1ᵉʳ mondial ne vaut pas marquer face au 200ᵉ. Toutes les moyennes sont <b>décalées d'un match</b> (anti-fuite de données) — un match ne voit jamais son propre résultat. Le score, lui, n'est <b>jamais</b> donné au modèle.</p>
+                  <div class="chips"><span>Points pondérés <b>0,20</b></span><span>Buts / force adv. <b>0,15</b></span><span>Buts encaissés <b>0,15</b></span><span>Rang FIFA <b>0,14</b></span></div>
+                </div>
+                <div class="explain-block">
+                  <h3><span class="ei">2</span> Quels hyperparamètres pèsent le plus ?</h3>
+                  <p>Les hyperparamètres sont les réglages qu'on fixe nous-mêmes. Pour XGBoost, les deux plus influents sont la <b>profondeur des arbres</b> (<code>max_depth</code>) — elle contrôle directement le sur-apprentissage — et le <b>taux d'apprentissage</b> (<code>learning_rate</code>), qui dose la prudence de chaque arbre.</p>
+                  <p>Une recherche aléatoire (<code>RandomizedSearchCV</code> — 15 essais, validation croisée 3 plis) a testé profondeur, nombre d'arbres, taux d'apprentissage et sous-échantillonnage. L'optimum trouvé n'apporte qu'un gain marginal (+0,4 pt) : on conserve le modèle de base, déjà bien réglé et plus sobre.</p>
+                  <div class="chips"><span>100 arbres</span><span>max_depth <b>4</b></span><span>learning_rate <b>0,05</b></span><span>gain <b>+0,4 pt</b></span></div>
+                </div>
+              </div>
+            </div>
           </section>
           <section class="panel">
             <div class="panel-head">
@@ -852,22 +1079,40 @@
           </section>
         </div>
 
+        <!-- PHASE DE GROUPES -->
+        <div class="view view-groups" data-panel="groups">
+          <section class="panel">
+            <div class="panel-head">
+              <div><h2>Les 12 groupes de la Coupe du Monde 2026</h2><p class="note">Tirage officiel du 5 décembre 2025 — classement projeté par le modèle (points, puis points espérés).</p></div>
+              <span class="badge">48 équipes</span>
+            </div>
+            <div class="panel-body scroll">
+              <div class="toolbar" aria-label="Filtrer les équipes">
+                <button class="active" type="button" data-gfilter="all">Toutes les équipes</button>
+                <button type="button" data-gfilter="qualified">Qualifiés</button>
+                <button type="button" data-gfilter="winners">Vainqueurs de groupe</button>
+              </div>
+              <div id="groups-grid" class="groups-grid f-all"></div>
+            </div>
+          </section>
+        </div>
+
         <!-- PHASE FINALE -->
         <div class="view view-tournament" data-panel="tournament">
           <section class="panel">
             <div class="panel-head">
-              <div><h2>Bracket simulé, tour par tour</h2><p class="note">Taille du point = confiance du modèle ; rouge = match serré (&lt; 55 %).</p></div>
+              <div><h2>Bracket interactif — 16ᵉˢ de finale à la finale</h2><p class="note">Filtrez par tour ; cliquez une équipe pour suivre son parcours. Bordure rouge = match serré (&lt; 55 %).</p></div>
             </div>
             <div class="panel-body scroll">
               <div class="toolbar" aria-label="Filtrer par tour">
-                <button class="active" type="button" data-round="all">Tous</button>
-                <button type="button" data-round="16es de finale">16es</button>
-                <button type="button" data-round="8es de finale">8es</button>
+                <button class="active" type="button" data-round="16es de finale">16ᵉˢ</button>
+                <button type="button" data-round="8es de finale">8ᵉˢ</button>
                 <button type="button" data-round="Quarts de finale">Quarts</button>
                 <button type="button" data-round="Demi-finales">Demies</button>
                 <button type="button" data-round="Finale">Finale</button>
+                <span id="track-chip" class="track-chip">Parcours&nbsp;: <b id="track-name"></b><button type="button" id="track-clear" aria-label="Retirer le filtre">✕</button></span>
               </div>
-              <div id="tn-knockout"></div>
+              <div id="tn-bracket" class="bracket-grid"></div>
             </div>
           </section>
           <section class="panel">
@@ -977,7 +1222,7 @@
       "Algeria": "dz", "Argentina": "ar", "Australia": "au", "Austria": "at",
       "Belgium": "be", "Bosnia and Herzegovina": "ba", "Brazil": "br",
       "Canada": "ca", "Cape Verde": "cv", "Colombia": "co", "Croatia": "hr",
-      "Curacao": "cw", "Czech Republic": "cz", "DR Congo": "cd", "Ecuador": "ec",
+      "Curaçao": "cw", "Czech Republic": "cz", "DR Congo": "cd", "Ecuador": "ec",
       "Egypt": "eg", "England": "gb-eng", "France": "fr", "Germany": "de",
       "Ghana": "gh", "Haiti": "ht", "Iran": "ir", "Iraq": "iq",
       "Ivory Coast": "ci", "Japan": "jp", "Jordan": "jo", "Mexico": "mx",
@@ -988,6 +1233,28 @@
       "Switzerland": "ch", "Tunisia": "tn", "Turkey": "tr", "United States": "us",
       "Uruguay": "uy", "Uzbekistan": "uz"
     };
+
+    /* ---- Noms d'équipes en français (affichage) ---- */
+    const teamFr = {
+      "Algeria": "Algérie", "Argentina": "Argentine", "Australia": "Australie",
+      "Austria": "Autriche", "Belgium": "Belgique", "Bosnia and Herzegovina": "Bosnie-Herz.",
+      "Brazil": "Brésil", "Canada": "Canada", "Cape Verde": "Cap-Vert",
+      "Colombia": "Colombie", "Croatia": "Croatie", "Curaçao": "Curaçao",
+      "Czech Republic": "Tchéquie", "DR Congo": "RD Congo", "Ecuador": "Équateur",
+      "Egypt": "Égypte", "England": "Angleterre", "France": "France",
+      "Germany": "Allemagne", "Ghana": "Ghana", "Haiti": "Haïti", "Iran": "Iran",
+      "Iraq": "Irak", "Ivory Coast": "Côte d'Ivoire", "Japan": "Japon",
+      "Jordan": "Jordanie", "Mexico": "Mexique", "Morocco": "Maroc",
+      "Netherlands": "Pays-Bas", "New Zealand": "Nouvelle-Zélande", "Norway": "Norvège",
+      "Panama": "Panama", "Paraguay": "Paraguay", "Portugal": "Portugal",
+      "Qatar": "Qatar", "Saudi Arabia": "Arabie saoudite", "Scotland": "Écosse",
+      "Senegal": "Sénégal", "South Africa": "Afrique du Sud", "South Korea": "Corée du Sud",
+      "Spain": "Espagne", "Sweden": "Suède", "Switzerland": "Suisse",
+      "Tunisia": "Tunisie", "Turkey": "Turquie", "United States": "États-Unis",
+      "Uruguay": "Uruguay", "Uzbekistan": "Ouzbékistan"
+    };
+
+    function fr(team) { return teamFr[team] || team; }
 
     function flagUrl(team) {
       const code = flags[team];
@@ -1082,6 +1349,23 @@
 
     const roundOrder = ["16es de finale", "8es de finale", "Quarts de finale", "Demi-finales", "Finale"];
 
+    /* ---- Phase de groupes : 12 groupes officiels + classement projeté (notebook 05) ---- */
+    /* [équipe, rang projeté, statut (q1/q2/q3/out), points espérés] */
+    const groupsData = {
+      A: [["Mexico", 1, "q1", 6.02], ["South Korea", 2, "q2", 3.57], ["Czech Republic", 3, "q3", 4.55], ["South Africa", 4, "out", null]],
+      B: [["Switzerland", 1, "q1", 5.64], ["Canada", 2, "q2", 4.87], ["Bosnia and Herzegovina", 3, "q3", 3.47], ["Qatar", 4, "out", null]],
+      C: [["Brazil", 1, "q1", 7.34], ["Scotland", 2, "q2", 4.11], ["Morocco", 3, "q3", 4.24], ["Haiti", 4, "out", null]],
+      D: [["United States", 1, "q1", 5.98], ["Australia", 2, "q2", 3.62], ["Turkey", 3, "q3", 3.59], ["Paraguay", 4, "out", null]],
+      E: [["Germany", 1, "q1", 6.59], ["Ivory Coast", 2, "q2", 4.12], ["Ecuador", 3, "q3", 5.17], ["Curaçao", 4, "out", null]],
+      F: [["Spain", 1, "q1", 7.15], ["Uruguay", 2, "q2", 5.42], ["Cape Verde", null, "out", null], ["Saudi Arabia", null, "out", null]],
+      G: [["Belgium", 1, "q1", 6.45], ["Egypt", 2, "q2", 4.24], ["Iran", 3, "q3", 4.11], ["New Zealand", 4, "out", null]],
+      H: [["Netherlands", 1, "q1", 6.54], ["Japan", 2, "q2", 4.20], ["Sweden", 3, "q3", 3.47], ["Tunisia", 4, "out", null]],
+      I: [["France", 1, "q1", 6.89], ["Norway", 2, "q2", 4.48], ["Senegal", null, "out", null], ["Iraq", null, "out", null]],
+      J: [["Argentina", 1, "q1", 7.04], ["Algeria", 2, "q2", 3.21], ["Austria", 3, "q3", 4.16], ["Jordan", 4, "out", null]],
+      K: [["Colombia", 1, "q1", 5.90], ["Portugal", 2, "q2", 6.75], ["DR Congo", null, "out", null], ["Uzbekistan", null, "out", null]],
+      L: [["England", 1, "q1", 6.97], ["Croatia", 2, "q2", 4.44], ["Ghana", null, "out", null], ["Panama", null, "out", null]]
+    };
+
     /* ---- Exploration : calculé sur matches_clean.csv (notebooks 03 & 04) ---- */
     const matchesYear = {
       years: [1993,1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026],
@@ -1140,6 +1424,17 @@
           ["ROC-AUC", "0,730", "Bonne séparation des classes.", ""]
         ]
       },
+      groups: {
+        title: "Phase de groupes",
+        sub: "Les 12 groupes officiels de la CDM 2026 et le classement projeté.",
+        status: "Phase 1",
+        kpis: [
+          ["Groupes", "12", "48 équipes, 4 par groupe.", ""],
+          ["Qualifiés", "32", "Les 2 premiers + les 8 meilleurs 3ᵉˢ.", "green"],
+          ["Meilleur 1ᵉʳ", "Brésil", "7,34 points espérés (groupe C).", "gold", FB],
+          ["Tirage au sort", "5 déc. 2025", "Kennedy Center, Washington D.C.", ""]
+        ]
+      },
       tournament: {
         title: "Phase à élimination directe",
         sub: "Simulation des 16es de finale jusqu'à la finale.",
@@ -1192,7 +1487,7 @@
     }
 
     function renderTitleRace(id) {
-      const data = titleRace.slice().reverse().map(function (d) { return { team: d.team, proba: d.proba, label: d.team }; });
+      const data = titleRace.slice().reverse().map(function (d) { return { team: d.team, proba: d.proba, label: fr(d.team) }; });
       Plotly.newPlot(id, [
         {
           type: "bar", orientation: "h",
@@ -1224,31 +1519,83 @@
       }), config);
     }
 
-    function renderKnockout(round) {
-      round = round || "all";
-      const rows = round === "all" ? bracketMatches : bracketMatches.filter(function (d) { return d.round === round; });
-      const yLabels = rows.map(function (d) { return d.match + "  " + d.a + " – " + d.b; });
-      Plotly.newPlot("tn-knockout", [{
-        type: "scatter", mode: "markers+text",
-        x: rows.map(function (d) { return d.round; }),
-        y: yLabels,
-        text: rows.map(function (d) { return "  " + d.winner; }),
-        textposition: "middle right", textfont: { size: 10.5, color: colors.ink },
-        cliponaxis: false,
-        marker: {
-          size: rows.map(function (d) { return 12 + (d.p - 50) * 0.86; }),
-          color: rows.map(function (d) { return d.winner === "Brazil" ? colors.gold : (d.p < 55 ? colors.red : colors.pitch); }),
-          opacity: 0.9, line: { color: "#ffffff", width: 2.4 }
-        },
-        customdata: rows.map(function (d) { return d.winner + " (" + d.p + " %)"; }),
-        hovertemplate: "%{y}<br>Qualifié : %{customdata}<extra></extra>"
-      }], Object.assign({}, layoutBase, {
-        height: round === "all" ? 880 : Math.max(320, rows.length * 48 + 130),
-        margin: { l: 210, r: 76, t: 16, b: 52 },
-        xaxis: { categoryorder: "array", categoryarray: roundOrder, gridcolor: "#eaf0f6", zeroline: false, tickfont: { size: 11 } },
-        yaxis: { automargin: true, autorange: "reversed", tickfont: { size: 10.5 } },
-        showlegend: false
-      }), config);
+    /* ---- Bracket interactif (sans Plotly) ---- */
+    let trackedTeam = null;
+    let currentRound = "16es de finale";
+    const roundShort = {
+      "16es de finale": "16ᵉˢ de finale", "8es de finale": "8ᵉˢ de finale",
+      "Quarts de finale": "Quart de finale", "Demi-finales": "Demi-finale", "Finale": "Finale"
+    };
+
+    function bracketRow(team, pct, isWin, isGold) {
+      const cls = "mc-row" + (isWin ? " win" : "") + (isWin && isGold ? " gold" : "") +
+                  (trackedTeam === team ? " tracked" : "");
+      const fl = flagUrl(team);
+      const img = fl ? '<img class="flag" src="' + fl + '" alt="">' : "";
+      return '<div class="' + cls + '" data-team="' + team + '">' + img +
+             '<span class="nm">' + fr(team) + '</span>' +
+             '<span class="pct">' + pct + ' %</span></div>';
+    }
+
+    function updateTrackChip() {
+      const chip = document.getElementById("track-chip");
+      if (trackedTeam) {
+        document.getElementById("track-name").textContent = fr(trackedTeam);
+        chip.classList.add("on");
+      } else {
+        chip.classList.remove("on");
+      }
+    }
+
+    function renderBracket() {
+      const rows = bracketMatches.filter(function (d) { return d.round === currentRound; });
+      const html = rows.map(function (d) {
+        const aWin = d.winner === d.a;
+        const pa = aWin ? d.p : 100 - d.p;
+        const pb = 100 - pa;
+        const tight = d.p < 55;
+        const gold = d.winner === "Brazil";
+        const onPath = trackedTeam && (d.a === trackedTeam || d.b === trackedTeam);
+        return '<article class="match-card' + (tight ? " tight" : "") + (onPath ? " on-path" : "") + '">' +
+               '<div class="mc-id">' + d.match + ' · ' + roundShort[d.round] + '</div>' +
+               bracketRow(d.a, pa, aWin, gold) +
+               bracketRow(d.b, pb, !aWin, gold) +
+               '<div class="mc-bar"><i style="width:' + Math.max(pa, pb) + '%"></i></div>' +
+               '</article>';
+      }).join("");
+      const grid = document.getElementById("tn-bracket");
+      grid.innerHTML = html;
+      grid.querySelectorAll(".mc-row").forEach(function (r) {
+        r.addEventListener("click", function () {
+          const t = r.dataset.team;
+          trackedTeam = (trackedTeam === t) ? null : t;
+          updateTrackChip();
+          renderBracket();
+        });
+      });
+    }
+
+    /* ---- Phase de groupes (sans Plotly) ---- */
+    function renderGroups() {
+      const order = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"];
+      const html = order.map(function (g) {
+        const teams = groupsData[g];
+        const nq = teams.filter(function (t) { return t[2] !== "out"; }).length;
+        const rows = teams.map(function (t) {
+          const name = t[0], rk = t[1], st = t[2], xp = t[3];
+          const fl = flagUrl(name);
+          const img = fl ? '<img class="flag" src="' + fl + '" alt="">' : "";
+          const xpTxt = (xp != null) ? xp.toFixed(2) + " xPts" : "Élim.";
+          return '<div class="gc-team ' + st + '">' +
+                 '<span class="rk">' + (rk || "—") + '</span>' + img +
+                 '<span class="nm">' + fr(name) + '</span>' +
+                 '<span class="xp">' + xpTxt + '</span></div>';
+        }).join("");
+        return '<article class="group-card">' +
+               '<div class="gc-head"><b>Groupe ' + g + '</b><span>' + nq + ' qualifiés</span></div>' +
+               rows + '</article>';
+      }).join("");
+      document.getElementById("groups-grid").innerHTML = html;
     }
 
     function renderModelComparison(id) {
@@ -1325,7 +1672,7 @@
 
     function renderGroupWinners(id) {
       const data = groupWinners.slice().reverse().map(function (d) {
-        return { team: d.team, group: d.group, xpts: d.xpts, label: d.team + " (" + d.group + ")" };
+        return { team: d.team, group: d.group, xpts: d.xpts, label: fr(d.team) + " (" + d.group + ")" };
       });
       Plotly.newPlot(id, [{
         type: "bar", orientation: "h",
@@ -1453,6 +1800,8 @@
     const rendered = {};
 
     function renderView(view) {
+      if (view === "groups") { renderGroups(); return; }
+      if (view === "tournament") { renderBracket(); return; }
       if (!window.Plotly) {
         document.getElementById("plotly-warning").style.display = "block";
         return;
@@ -1464,7 +1813,6 @@
       if (view === "overview") { renderTitleRace("ov-title-race"); renderUncertainty("ov-uncertainty"); }
       else if (view === "data") { renderMatchesYear("da-matches-year"); renderGoalsDecade("da-goals-decade"); renderResults("da-results"); renderRankGap("da-rank-gap"); }
       else if (view === "model") { renderModelComparison("md-model-comparison"); renderFeatureImpact("md-feature-impact"); renderClassBalance("md-class-balance"); }
-      else if (view === "tournament") { renderKnockout("all"); }
       else if (view === "teams") { renderTitleRace("tm-title-race"); renderGroupWinners("tm-group-winners"); }
       rendered[view] = true;
     }
@@ -1514,7 +1862,23 @@
       button.addEventListener("click", function () {
         document.querySelectorAll("[data-round]").forEach(function (b) { b.classList.remove("active"); });
         button.classList.add("active");
-        if (window.Plotly) renderKnockout(button.dataset.round);
+        currentRound = button.dataset.round;
+        renderBracket();
+      });
+    });
+
+    document.getElementById("track-clear").addEventListener("click", function () {
+      trackedTeam = null;
+      updateTrackChip();
+      renderBracket();
+    });
+
+    /* ---- Filtres de la phase de groupes ---- */
+    document.querySelectorAll("[data-gfilter]").forEach(function (button) {
+      button.addEventListener("click", function () {
+        document.querySelectorAll("[data-gfilter]").forEach(function (b) { b.classList.remove("active"); });
+        button.classList.add("active");
+        document.getElementById("groups-grid").className = "groups-grid f-" + button.dataset.gfilter;
       });
     });
 

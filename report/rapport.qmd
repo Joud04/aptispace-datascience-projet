@@ -162,15 +162,16 @@ Ci-dessous est intégré le squelette de votre diaporama de soutenance RevealJS.
 
 Le livrable de restitution du projet est un **tableau de bord autonome** :
 `dashboard.html`, un fichier unique ouvrable dans n'importe quel navigateur, sans
-installation. Il synthétise l'ensemble du pipeline en **six vues** que l'on
+installation. Il synthétise l'ensemble du pipeline en **sept vues** que l'on
 parcourt depuis une barre latérale.
 
 | Vue | Contenu |
 |---|---|
 | **Vue d'ensemble** | Course au titre, probabilité du champion et part d'incertitude. |
 | **Jeu de données** | Volume de matchs, buts par décennie, répartition des résultats, poids de l'écart de classement FIFA. |
-| **Modèle** | Comparaison Baseline / Random Forest / XGBoost, variables influentes, classes mal détectées. |
-| **Phase finale** | Bracket simulé des 16ᵉˢ à la finale, filtrable par tour, et podium projeté. |
+| **Modèle** | Comparaison Baseline / Random Forest / XGBoost, variables influentes, classes mal détectées, et explication des choix de variables et d'hyperparamètres. |
+| **Phase de groupes** | Les 12 groupes officiels avec drapeaux et classement projeté de chaque équipe (points espérés). |
+| **Phase finale** | Bracket interactif des 16ᵉˢ à la finale, filtrable par tour, suivi du parcours d'une équipe, et podium projeté. |
 | **Équipes** | Probabilités de titre et meilleurs vainqueurs de groupe (xPts). |
 | **Décision** | Trois messages clés et récapitulatif des indicateurs. |
 
@@ -198,7 +199,9 @@ Dans une démarche de transparence scientifique et académique, cette section d�
 
 | Outil d'IA | Cas d'usage (Pourquoi ?) | Méthode d'utilisation (Comment ?) | Rôle et Validation Humaine |
 | :--- | :--- | :--- | :--- |
-| **[Outil d'IA]** | *[À compléter par les étudiants]* | *[À compléter par les étudiants]* | *[À compléter par les étudiants]* |
+| **Claude Code** | Accélérer le développement du pipeline et le débogage du code Python. | Assistant en ligne de commande sollicité sur des extraits précis : *feature engineering*, jointures `pandas`, modèles `scikit-learn` / `XGBoost`. | L'équipe conçoit la démarche et les choix de modélisation. Chaque suggestion est relue, exécutée sur les données réelles et validée avant intégration — aucun code accepté sans test. |
+| **Claude Code** | Structurer et relire la rédaction du rapport et des notebooks. | Reformulation de passages, vérification de cohérence terminologique, aide à la structuration narrative (SCQA, pyramide de Minto). | Les analyses, l'interprétation des résultats et les conclusions sont rédigées par l'équipe. L'IA n'intervient que sur la forme ; tout chiffre est vérifié contre les sorties des notebooks. |
+| **Claude Code** | Construire le tableau de bord interactif (`dashboard.html`). | Génération du code HTML / CSS / JavaScript du livrable de restitution, à partir des résultats produits par le pipeline. | Les données proviennent exclusivement des fichiers CSV des notebooks 05 et 06. Rendu et cohérence avec le rapport contrôlés par l'équipe. |
 
 ## Principes de Rigueur et Responsabilité
 
